@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Karteikarten-Trainer – Nösse Datentechnik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0b1624;--bg2:#111f33;--bg3:#162844;--bg4:#1c3256;
+      --border:#1e3354;--border2:#264466;
+      --green:#6abf4b;--gdim:#6abf4b1a;--gdk:#3d7a27;
+      --red:#e05252;--rdim:#e0525218;--blue:#4da8da;--gold:#e8b84b;
+      --text:#ddeeff;--text2:#8aacc8;--text3:#5a7a96;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+    button{font-family:inherit;cursor:pointer;border:none;}
+    ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+    .site-header{background:linear-gradient(180deg,#0a1420,#0b1624);border-bottom:1px solid var(--border);padding:0 24px;}
+    .header-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;}
+    .header-badge{font-size:11px;background:var(--gdim);color:var(--green);border:1px solid var(--green);border-radius:4px;padding:3px 9px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;}
+    .hero-band{background:linear-gradient(135deg,#0d1e35,#0f2540,#122e4a);border-bottom:2px solid var(--gdk);padding:28px 24px 22px;text-align:center;}
+    .hero-band h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(20px,5vw,30px);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;margin-bottom:6px;}
+    .hero-band h1 span{color:var(--green);}
+    .hero-band p{font-size:14px;color:var(--text2);max-width:480px;margin:0 auto;line-height:1.6;}
+    .main{max-width:760px;margin:0 auto;padding:28px 16px 60px;}
+    .start-card{background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:8px;padding:26px 22px;margin-bottom:20px;}
+    .start-card h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:10px;}
+    .start-card p{font-size:14px;color:var(--text2);line-height:1.65;margin-bottom:6px;}
+    .start-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;}
+    .stat-box{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:14px;text-align:center;}
+    .stat-num{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--green);line-height:1;}
+    .stat-lbl{font-size:11px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;}
+    .prog-row{display:flex;justify-content:space-between;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
+    .prog-right{color:var(--green);}
+    .prog-bar{height:4px;background:var(--bg3);border-radius:2px;margin-bottom:18px;overflow:hidden;}
+    .prog-fill{height:100%;background:linear-gradient(90deg,var(--gdk),var(--green));border-radius:2px;transition:width .4s;}
+    .counter-pill{display:flex;flex-wrap:wrap;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:7px 18px;margin-bottom:18px;}
+    .cpill{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+    .cp-green{color:var(--green);} .cp-red{color:var(--red);} .cp-grey{color:var(--text3);}
+    .card-wrap{perspective:1200px;width:100%;margin-bottom:16px;cursor:pointer;}
+    .card-inner{position:relative;width:100%;min-height:200px;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);}
+    .card-inner.flipped{transform:rotateY(180deg);}
+    .card-face,.card-back{backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:10px;background:var(--bg2);border:1px solid var(--border);padding:26px 24px;}
+    .card-back{position:absolute;top:0;left:0;width:100%;transform:rotateY(180deg);border-top:3px solid var(--green);}
+    .card-type-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;padding:3px 8px;margin-bottom:16px;}
+    .badge-bundle{background:#1a3a6a;color:var(--blue);}
+    .badge-service{background:var(--gdk);color:#c8f0b8;}
+    .card-name{font-family:'Barlow Condensed',sans-serif;font-size:clamp(24px,6vw,36px);font-weight:700;color:#fff;line-height:1.1;margin-bottom:10px;}
+    .card-price{font-size:13px;color:var(--green);font-weight:600;margin-bottom:20px;}
+    .flip-hint{font-size:12px;color:var(--text3);letter-spacing:.06em;text-align:center;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;}
+    .back-sec{margin-bottom:14px;}
+    .back-sec:last-child{margin-bottom:0;}
+    .back-sec-title{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;}
+    .sec-desc .back-sec-title{color:var(--blue);}
+    .sec-stmt .back-sec-title{color:var(--gold);}
+    .sec-excl .back-sec-title{color:var(--red);}
+    .sec-bundle .back-sec-title{color:var(--green);}
+    .back-text{font-size:13px;color:var(--text2);line-height:1.65;}
+    .stmt-item{font-style:italic;border-left:2px solid var(--gold);padding-left:10px;margin-bottom:7px;font-size:13px;color:var(--text2);line-height:1.5;}
+    .stmt-item:last-child{margin-bottom:0;}
+    .excl-box{font-size:13px;color:var(--text2);line-height:1.65;background:var(--rdim);border:1px solid var(--red);border-radius:5px;padding:9px 12px;}
+    .bundle-box{font-size:13px;color:var(--text2);line-height:1.65;background:var(--gdim);border:1px solid var(--gdk);border-radius:5px;padding:9px 12px;}
+    .action-area{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+    .btn-knew{padding:14px;background:var(--green);color:#0b1624;border-radius:6px;font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;transition:background .15s;}
+    .btn-knew:hover{background:#7dd65e;}
+    .btn-again{padding:14px;background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:6px;font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;transition:all .15s;}
+    .btn-again:hover{border-color:var(--text2);color:var(--text);}
+    .btn-flip{width:100%;padding:11px;background:var(--bg3);color:var(--text2);border:1px solid var(--border2);border-radius:6px;font-size:13px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;transition:all .15s;margin-bottom:8px;}
+    .btn-flip:hover{background:var(--bg4);color:var(--text);border-color:var(--border2);}
+    .btn-skip{width:100%;padding:9px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;transition:all .15s;}
+    .btn-skip:hover{color:var(--text2);border-color:var(--border2);}
+    .btn-start{width:100%;padding:15px;background:var(--green);color:#0b1624;border-radius:6px;font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:background .15s;}
+    .btn-start:hover{background:#7dd65e;}
+    .result-card{background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:8px;padding:32px 24px;text-align:center;margin-bottom:20px;}
+    .result-ring{width:110px;height:110px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 18px;border:4px solid var(--green);background:var(--gdim);}
+    .result-pct{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:var(--green);line-height:1;}
+    .result-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+    .result-msg{font-size:18px;font-weight:700;margin-bottom:6px;}
+    .result-detail{font-size:13px;color:var(--text3);}
+    .site-footer{border-top:1px solid var(--border);padding:18px 24px;text-align:center;font-size:12px;color:var(--text3);}
+    .site-footer strong{color:var(--text2);}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <img src="data:image/png;base64,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" alt="Nösse" style="height:40px;display:block;"/>
+    <span class="header-badge">Karteikarten-Trainer</span>
+  </div>
+</header>
+<div class="hero-band">
+  <h1>Managed Services<span> – </span>Karteikarten-Trainer</h1>
+  <p>Lerne alle Services und Bundles kennen. Karten, die du noch nicht kennst, kommen automatisch häufiger wieder.</p>
+</div>
+<div id="root"></div>
+<footer class="site-footer">
+  <strong>Nösse Datentechnik GmbH &amp; Co. KG</strong>&nbsp;·&nbsp;Internes Vertriebstraining&nbsp;·&nbsp;Nicht zur Weitergabe an Kunden bestimmt
+</footer>
+<script>
+const CARDS = [{"id": "b01", "shortLabel": "Managed User Standard", "type": "bundle", "price": "31,90 € / User / Monat", "context": "Das Basis-Bundle für alle Benutzergeräte. Kombiniert Endpoint Protection (Schutz vor Schadsoftware), Patch Management (automatische Updates) und Monitoring (proaktive Überwachung) in einem Paket. Empfohlene Mindestabsicherung für jeden Kunden.", "statements": ["Unsere Mitarbeiter beklagen sich ständig über Probleme mit ihren Computern – wir wissen nie, in welchem Zustand die Geräte wirklich sind.", "Ich mache mir Sorgen, dass wir uns einen Virus einfangen – unsere Laptops laufen alle vor sich hin, ohne dass sich jemand darum kümmert."], "notIncluded": "Backup der Benutzerdaten, sichere Authentifizierung, E-Mail Security & Archivierung – diese Services sind erst im Premium-Bundle enthalten.", "bundleInfo": "Basis-Bundle im Managed-User-Portfolio. Voraussetzung für Managed User Premium."}, {"id": "b02", "shortLabel": "Managed User Premium", "type": "bundle", "price": "54,90 € / User / Monat", "context": "Erweiterung des Standard-Bundles um M365 Backup, E-Mail Security & Archivierung sowie sichere Authentifizierung mit Hardware-Security-Keys. Empfohlene Komplettlösung für Unternehmen mit Microsoft 365.", "statements": ["Ich will eine Rundumversorgung für alle Mitarbeiter: Geräte geschützt, E-Mails sicher, Konten abgesichert und alles in Microsoft 365 gesichert.", "Bei uns wurden schon Mitarbeiter-Konten angegriffen. Ich will, dass unsere Benutzer und ihre Daten von A bis Z abgesichert sind."], "notIncluded": "Incident Response und forensische Analysen, Projektleistungen, individuelle Sicherheitsarchitektur – diese sind nicht im laufenden Service enthalten.", "bundleInfo": "Enthält Managed User Standard + M365 Backup + E-Mail Security & Archivierung + Sicheres Authentifizieren."}, {"id": "b03", "shortLabel": "Managed Server Standard", "type": "bundle", "price": "49,90 € / Server / Monat", "context": "Das Basis-Bundle für Serversysteme mit Endpoint Protection (inkl. XDR), Patch Management und Monitoring. Speziell für Serverumgebungen ausgelegt – mit besonderer Sorgfalt bei Update-Fenstern und Verfügbarkeit.", "statements": ["Unser Server ist absolut geschäftskritisch – wenn der ausfällt, steht bei uns alles still. Ich brauche jemanden, der sich dauerhaft darum kümmert.", "Ich habe keine Ahnung, ob unser Server auf dem neuesten Stand ist oder ob da Sicherheitslücken klaffen. Das macht mir nachts Sorgen."], "notIncluded": "Server Backup ist NICHT enthalten – bei Ausfall oder Ransomware gibt es ohne separates Backup keine Wiederherstellung. Kein Incident Response.", "bundleInfo": "Basis-Bundle im Managed-Server-Portfolio. Voraussetzung für Managed Server Premium."}, {"id": "b04", "shortLabel": "Managed Server Premium", "type": "bundle", "price": "89,90 € / Server / Monat", "context": "Managed Server Standard + vollständig gemanagtes Cloud Backup mit Immutable-Technologie (Ransomware-sicher). 500 GB Backup-Speicher inklusive, regelmäßige Wiederherstellungstests fester Bestandteil.", "statements": ["Wir hatten mal einen Serverausfall und haben Tage gebraucht, um wieder an unsere Daten zu kommen. Das darf nie wieder passieren.", "Wir hatten einen Ransomware-Angriff bei einem Bekannten. Die haben alles verloren. Ich will, dass unsere Serverdaten extern und unveränderbar gesichert sind."], "notIncluded": "Backup-Volumen über 500 GB kostet extra (6,90 € / 100 GB). Migration oder Neuinstallation von Servern ist nicht enthalten.", "bundleInfo": "Enthält Managed Server Standard + Server Backup (Cloud Backup inkl. Management)."}, {"id": "b05", "shortLabel": "Managed Security Standard", "type": "bundle", "price": "199,90 € / Monat", "context": "Schützt die drei zentralen Sicherheitsebenen: Netzwerk (Firewall), Cloud-Identitäten (M365 Tenant Baseline) und lokale Identitätsstruktur (Active Directory Baseline). Empfohlene Sicherheitsbasis für jede produktive IT-Umgebung.", "statements": ["Wir haben eine Firewall, ein Active Directory und nutzen Microsoft 365 – aber ob das alles sicher konfiguriert ist, kann mir keiner sagen.", "Nach einer Sicherheitsprüfung durch unsere Versicherung haben wir Handlungsbedarf für Firewall, AD und M365 bekommen. Wie gehen wir das an?"], "notIncluded": "Firewall-Hardware und Herstellerlizenzen sind NICHT enthalten. Kein Security Monitoring/SOC, keine Incident Response, keine Server- oder Client-Security.", "bundleInfo": "Enthält Firewall Betrieb + M365 Tenant Baseline + AD Baseline & Security. Voraussetzung für Managed Security Premium."}, {"id": "b06", "shortLabel": "Managed Security Premium", "type": "bundle", "price": "1.590 € / Monat", "context": "Höchste Ausbaustufe: Managed Security Standard + ITSB Security Manager (strategische Steuerung) + Schwachstellenmanagement (kontinuierliche Analyse). Für Unternehmen mit Compliance-Anforderungen wie NIS2 oder ISO 27001.", "statements": ["Wir unterliegen regulatorischen Anforderungen und müssen nachweisen können, dass wir IT-Sicherheit ernstnehmen – aber intern fehlt die Struktur.", "Ich will nicht nur Schutz – ich will wissen, wo unsere größten Risiken liegen und wie wir uns systematisch verbessern."], "notIncluded": "Incident Response und forensische Analysen sind nicht enthalten. Keine Zertifizierungsprojekte (z.B. ISO 27001 Audit durch externe Stellen).", "bundleInfo": "Enthält Managed Security Standard + ITSB Security Manager + Schwachstellenmanagement (Grundservice). Asset-abhängige Analysepreise werden separat berechnet."}, {"id": "s02", "shortLabel": "Endpoint Protection (User)", "type": "service", "price": "14,90 € / User / Monat", "context": "Mehr als ein Virenscanner: XDR-Technologie erkennt auch ungewöhnliches Verhalten (nicht nur bekannte Schadsoftware). Sicherheitsrichtlinien werden zentral verwaltet und einheitlich umgesetzt. Ausnahmen für Anwendungen werden strukturiert dokumentiert.", "statements": ["Wir haben zwar irgendwie einen Virenscanner drauf, aber wer das konfiguriert hat und ob der läuft, weiß ich ehrlich gesagt nicht.", "Mehrere Mitarbeiter haben auf Phishing-Links geklickt. Ich will, dass gefährliche Inhalte automatisch blockiert werden, bevor sie Schaden anrichten."], "notIncluded": "Keine Incident Response, kein Threat Hunting, kein SOC. Keine Wiederherstellung kompromittierter Systeme – das sind Projektleistungen.", "bundleInfo": "Enthalten in: Managed User Standard und Managed User Premium."}, {"id": "s03", "shortLabel": "Patch Management (User)", "type": "service", "price": "14,90 € / User / Monat", "context": "Automatische, kontrollierte Verteilung von Sicherheits- und Funktionsupdates in abgestimmten Wartungsfenstern. Fehlgeschlagene Updates werden erkannt und als Ticket angelegt. Optional: Firmware-Update-Management zubuchbar.", "statements": ["Bei uns bekommen die Mitarbeiter ständig Update-Meldungen und klicken sie einfach weg. Ich bin sicher, dass viele Geräte total veraltet sind.", "Ich will nicht, dass meine Mitarbeiter selbst entscheiden, ob sie Updates installieren oder nicht. Das soll automatisch und kontrolliert laufen."], "notIncluded": "Keine OS-Upgrades oder Betriebssystem-Migrationen. Keine individuelle Applikationstests komplexer Softwareumgebungen. Firmware nur mit gebuchter Erweiterung.", "bundleInfo": "Enthalten in: Managed User Standard und Managed User Premium."}, {"id": "s04", "shortLabel": "Monitoring (User)", "type": "service", "price": "7,90 € / User / Monat", "context": "Kontinuierliche Überwachung aller Benutzergeräte auf Systemzustände: Sind Sicherheitsagenten aktiv? Laufen wichtige Dienste? Bei Auffälligkeiten wird automatisch ein Ticket angelegt – bevor der Nutzer etwas bemerkt.", "statements": ["Meistens merken wir erst, dass mit einem Computer etwas nicht stimmt, wenn der Mitarbeiter sich schon beschwert – da ist das Problem längst da.", "Ein Gerät bei uns hat seit Tagen Fehler im Hintergrund produziert. Das hat niemand gemerkt – bis es abgestürzt ist."], "notIncluded": "Keine Ursachenanalyse komplexer Störungen als Projektleistung. Keine Incident Response oder Sicherheitsforensik. Keine Architekturberatung.", "bundleInfo": "Enthalten in: Managed User Standard und Managed User Premium."}, {"id": "s05", "shortLabel": "M365 Backup", "type": "service", "price": "9,90 € / User / Monat", "context": "Tägliche automatisierte Sicherung von Postfächern, OneDrive und SharePoint – unabhängig von Microsoft in einer separaten Backup-Umgebung. Granulare Wiederherstellung einzelner Elemente möglich (nicht nur ganze Postfächer).", "statements": ["Ein Mitarbeiter hat versehentlich wichtige Dateien in OneDrive gelöscht. Microsoft hat uns gesagt, die Daten sind weg – das kann so nicht sein.", "Ich dachte immer, Microsoft sichert unsere Daten automatisch. Jetzt habe ich gelesen, dass das nicht wirklich stimmt."], "notIncluded": "Kein Backup-Konzept als Projektleistung. Keine Wiederherstellungen außerhalb Microsoft 365. Microsoft 365 sichert selbst nicht vollständig gegen versehentliches Löschen!", "bundleInfo": "Enthalten in: Managed User Premium. Einzeln buchbar mit aktivem Managed User Standard."}, {"id": "s06", "shortLabel": "E-Mail Security & Archivierung", "type": "service", "price": "12,90 € / User / Monat", "context": "Automatische Filterung von Spam, Phishing und Schadsoftware aus E-Mails. Verdächtige Nachrichten in Quarantäne. Revisionssichere und unveränderbare Archivierung aller Geschäfts-E-Mails mit Self-Service-Zugriff für Nutzer.", "statements": ["Unsere Mitarbeiter bekommen massenhaft Phishing-Mails. Letzte Woche hat fast jemand auf einen gefährlichen Link geklickt.", "Wir hatten mal einen Rechtsstreit und hätten E-Mails vorlegen müssen – die waren nicht mehr auffindbar. Das darf nicht passieren."], "notIncluded": "Keine Incident Response oder forensischen Analysen. Keine E-Mail-Migrationen. Keine erweiterten Security-Analyseleistungen.", "bundleInfo": "Enthalten in: Managed User Premium. Einzeln buchbar mit aktivem Managed User Standard."}, {"id": "s07", "shortLabel": "Sicheres Authentifizieren", "type": "service", "price": "8,00 € / User / Monat", "context": "Phishing-resistente MFA mit Hardware-Security-Keys (z.B. YubiKey). Der Key muss bei der Anmeldung physisch vorhanden sein – digitaler Diebstahl ist damit unmöglich. Gilt für alle Microsoft 365 Anwendungen und weitere angebundene Systeme.", "statements": ["Ein Mitarbeiter-Konto wurde gehackt, obwohl wir ein Passwort hatten – der Angreifer war einfach drin.", "Unsere Cyberversicherung fordert phishing-resistente MFA. SMS-Codes oder Authenticator-App reichen nicht mehr."], "notIncluded": "Ersatz bei Verlust durch den Benutzer ist KOSTENPFLICHTIG – kein automatischer kostenfreier Ersatz. Kein Endanwender-Support außerhalb der Aktivierung.", "bundleInfo": "Enthalten in: Managed User Premium. Einzeln buchbar mit aktivem Managed User Standard."}, {"id": "s11", "shortLabel": "Endpoint Protection (Server)", "type": "service", "price": "19,90 € / Server / Monat", "context": "Speziell für Serverumgebungen ausgelegte XDR-Sicherheitslösung. Serverkritische Prozesse (z.B. Datenbankdienste) werden als geprüfte Ausnahmen verwaltet, damit der Betrieb nicht gestört wird. Anders konfiguriert als die User-Variante.", "statements": ["Auf unserem Server laufen unsere wichtigsten Programme und Datenbanken. Wenn der angegriffen wird, ist das eine Katastrophe – ist der eigentlich geschützt?", "Unser Server ist mit dem Internet verbunden und hostet unsere Warenwirtschaft. Der muss sehr gut geschützt sein."], "notIncluded": "Keine Incident Response oder forensischen Analysen. Keine Wiederherstellung kompromittierter Systeme – das sind kostenpflichtige Projektleistungen.", "bundleInfo": "Enthalten in: Managed Server Standard und Managed Server Premium."}, {"id": "s12", "shortLabel": "Patch Management (Server)", "type": "service", "price": "19,90 € / Server / Monat", "context": "Serverupdates werden über definierte Wartungsfenster (z.B. nachts/Wochenende) gesteuert, damit der Betrieb nicht unterbrochen wird. Fehlgeschlagene Updates werden erkannt und nachverfolgt.", "statements": ["Unser Server läuft seit Monaten ohne Updates – der Admin sagt, er hat keine Zeit, und ich traue mich nicht, einfach loszulegen.", "Ich will, dass Sicherheitsupdates auf dem Server geplant eingespielt werden, ohne dass er mitten im Betrieb neu startet."], "notIncluded": "Keine Major-Upgrades oder Betriebssystem-Migrationen. Keine individuellen Softwaretests. Proaktives Schwachstellenmanagement ist ein separater Service.", "bundleInfo": "Enthalten in: Managed Server Standard und Managed Server Premium."}, {"id": "s13", "shortLabel": "Monitoring (Server)", "type": "service", "price": "19,90 € / Server / Monat", "context": "Überwacht Verfügbarkeit, Systemressourcen (CPU, RAM, Festplatte) und – wichtiger Unterschied zum User-Monitoring – auch den Backup-Status der Server. Bei kritischen Abweichungen wird automatisch ein Ticket angelegt.", "statements": ["Letzte Woche lief unser Server heiß und ist abgestürzt – gemerkt haben wir das erst, als alle Mitarbeiter nicht mehr arbeiten konnten.", "Unser Server-Backup hat seit zwei Wochen nicht mehr funktioniert – das haben wir erst zufällig bemerkt."], "notIncluded": "Kein Backup Management, keine Wiederherstellungen, keine Fehlerbehebung bei Backup-Jobs – das gehört zum Server Backup Service. Kein Incident Response.", "bundleInfo": "Enthalten in: Managed Server Standard und Managed Server Premium."}, {"id": "s14", "shortLabel": "Server Backup", "type": "service", "price": "39,90 € / Server / Monat", "context": "Vollständig gemanagte Cloud-Backup-Lösung mit Immutable-Technologie (Wasabi): Daten können nach dem Speichern nicht mehr verändert oder gelöscht werden – auch nicht von Ransomware. 500 GB inklusive, regelmäßige Wiederherstellungstests.", "statements": ["Unser Server steht im Büro. Wenn der abbrennt oder gestohlen wird, sind unsere ganzen Unternehmensdaten weg.", "Wir haben irgendwie ein Backup, aber ob das wirklich funktioniert und ob wir im Ernstfall wiederherstellen können, wurde noch nie getestet."], "notIncluded": "Backup-Volumen über 500 GB kostet extra (6,90 € / 100 GB). Kein Backup-Konzept als Projektleistung. Keine Wiederherstellung ganzer IT-Infrastrukturen als Projekt.", "bundleInfo": "Enthalten in: Managed Server Premium. Einzeln buchbar mit aktivem Managed Server Standard."}, {"id": "s21", "shortLabel": "Firewall Betrieb", "type": "service", "price": "129,90 € / Firewall / Monat", "context": "Laufender Betrieb inkl. Firmware-Updates, Konfigurationssicherung, Betriebsüberwachung und Pflege des Regelwerks nach Minimalprinzip. Besonderheit: Jährliches Firewall-Audit, bei dem alle Freigaben auf Notwendigkeit bewertet werden.", "statements": ["Wir haben eine Firewall, aber die wurde vor drei Jahren eingerichtet und seitdem hat niemand mehr draufgeschaut.", "Jedes Mal wenn wir ein neues Programm brauchen, öffnen wir irgendwelche Ports in der Firewall. Ob das noch sinnvoll ist, kann mir keiner sagen."], "notIncluded": "Firewall-Hardware, Herstellerlizenzen und Security-Subscriptions sind NICHT enthalten – diese muss der Kunde selbst stellen. Kein Hardware-Austausch, kein Netzwerk-Redesign.", "bundleInfo": "Enthalten in: Managed Security Standard und Managed Security Premium."}, {"id": "s22", "shortLabel": "M365 Tenant Baseline", "type": "service", "price": "49,90 € / Tenant / Monat", "context": "Microsoft 365 wird kompatibel ausgeliefert – nicht sicher. Dieser Service richtet eine sichere Basiskonfiguration ein und pflegt sie dauerhaft: veraltete Authentifizierung deaktivieren, externe Freigaben kontrollieren, privilegierte Konten überwachen.", "statements": ["Wir nutzen Microsoft 365 schon länger, aber ob das alles sicher eingestellt ist, weiß ich nicht. Die Standardeinstellungen können doch nicht wirklich sicher sein.", "Ein Mitarbeiter hat aus Versehen externe Freigaben für alle unsere SharePoint-Dokumente aktiviert. Können solche Fehler automatisch erkannt werden?"], "notIncluded": "Keine Microsoft 365 Lizenzkosten. Kein Endanwender-Support, kein MDM, keine Migration oder Neuaufbau des Tenants. Keine Incident Response.", "bundleInfo": "Enthalten in: Managed Security Standard und Managed Security Premium."}, {"id": "s23", "shortLabel": "AD Baseline & Security", "type": "service", "price": "49,90 € / AD-Umgebung / Monat", "context": "Active Directory steuert, wer Zugriff auf was hat – eine kompromittierte AD gibt Angreifern vollständige Kontrolle über die gesamte IT. Dieser Service härtet und überwacht Passwortrichtlinien, Gruppenrichtlinien und privilegierte Konten.", "statements": ["Wir haben viele Mitarbeiter, die kommen und gehen – ich bin nicht sicher, ob alle alten Konten gelöscht sind und ob niemand zu viele Rechte hat.", "Ein ehemaliger IT-Dienstleister hat noch Domain-Admin-Rechte in unserem Active Directory."], "notIncluded": "Keine Migration oder Neuaufbau einer AD-Umgebung. Keine Incident Response oder forensische Analysen. Keine Architekturänderungen außerhalb der definierten Baseline.", "bundleInfo": "Enthalten in: Managed Security Standard und Managed Security Premium."}, {"id": "s24", "shortLabel": "ITSB Security Manager", "type": "service", "price": "1.190 € / Monat", "context": "Externe Übernahme der Rolle des Informationssicherheitsbeauftragten: jährliche ITQ-Analysen, Sicherheitsroadmaps, quartalsweise Berichte an die Geschäftsführung. Unterstützung bei NIS2, ISO 27001 und ähnlichen Anforderungen.", "statements": ["IT-Sicherheit ist bei uns Chefsache, aber ich bin kein IT-Experte. Ich brauche jemanden, der das für mich steuert und mir sagt, wo wir Handlungsbedarf haben.", "Wir müssen gegenüber Kunden nachweisen, dass wir IT-Sicherheit ernstnehmen. Ich brauche jemanden, der das strukturiert aufbaut und dokumentiert."], "notIncluded": "Keine technische Umsetzung von Maßnahmen als Projekt. Keine Incident Response oder Forensik. Keine Rechtsberatung. Keine Zertifizierungsprojekte durch externe Stellen.", "bundleInfo": "Enthalten in: Managed Security Premium. Voraussetzung: aktives Managed Security Standard Bundle."}, {"id": "s25", "shortLabel": "Schwachstellenmanagement", "type": "service", "price": "499 € Grundservice + 12 € / Client + 69 € / Server", "context": "Automatisierter Scan von Endgeräten und Servern auf bekannte Sicherheitslücken – auch solche, die Patch Management noch nicht geschlossen hat. Sicherheitsspezialisten bewerten und priorisieren die Ergebnisse, monatlicher Report mit Management-Zusammenfassung.", "statements": ["Ich lese ständig von neuen Sicherheitslücken in Software. Wie soll ich wissen, ob unsere Systeme betroffen sind, bevor es zu spät ist?", "Wir patchen regelmäßig, aber ob wirklich alle kritischen Lücken geschlossen sind, wissen wir nicht."], "notIncluded": "Keine Durchführung von Patch-Installationen oder Behebung der Lücken. Keine Penetrationstests. Kein Incident Response. Der Service erkennt und bewertet – er behebt nicht.", "bundleInfo": "Enthalten in: Managed Security Premium. Voraussetzung: aktives Managed User oder Managed Server Bundle."}, {"id": "s31", "shortLabel": "MDR", "type": "service", "price": "49 € / User · 79 € / Server / Monat", "context": "24/7 Security Operations Center (SOC) als Erweiterung zur Endpoint Protection. Sicherheitsexperten analysieren auffällige Aktivitäten und können betroffene Systeme aktiv isolieren und Schadsoftware bereinigen. Voraussetzung: XDR-fähige Endpoint Protection (z.B. Sophos).", "statements": ["Ich will nicht erst nach einem Angriff merken, dass jemand in unseren Systemen war. Gibt es jemanden, der das rund um die Uhr überwacht?", "Wir haben Schutzsoftware, aber die kann nur bekannte Angriffe blocken. Was passiert, wenn ein Angreifer trotzdem reinkommt?"], "notIncluded": "Keine forensischen Untersuchungen. Keine Wiederherstellung kompromittierter Systeme als Projektleistung. Keine Rechtsberatung. Incident Response Projekte sind separat.", "bundleInfo": "Add-on Service – kein Bundle. Einzeln buchbar. Setzt aktives Managed User oder Managed Server Bundle voraus."}, {"id": "s32", "shortLabel": "Security Awareness Training", "type": "service", "price": "11,90 € / User / Monat", "context": "Plattform (Hornetsecurity) mit interaktiven Schulungsmodulen und simulierten Phishing-Kampagnen. Mitarbeitende lernen, Bedrohungen zu erkennen. Fortschritt wird messbar gemacht. Integrierte Meldefunktion für verdächtige E-Mails.", "statements": ["Unsere Mitarbeiter klicken auf alles, was ihnen per E-Mail zugeschickt wird. Die Technik kann noch so sicher sein – der Mensch ist das schwächste Glied.", "Unsere Cyberversicherung fragt, ob wir Sicherheitsschulungen für Mitarbeiter durchführen. Das machen wir bisher nicht."], "notIncluded": "Keine arbeitsrechtlichen Maßnahmen bei Verstößen. Keine Einzelcoachings. Keine HR-Beratung. Keine IT-Forensik bei durch Phishing verursachten Vorfällen.", "bundleInfo": "Add-on Service – kein Bundle. Einzeln buchbar."}, {"id": "s33", "shortLabel": "MDM", "type": "service", "price": "19,90 € / Gerät / Monat", "context": "Zentrale Verwaltung mobiler Geräte (Smartphones, Tablets, mobile Windows-Geräte) über Microsoft Intune. Sicherheitsrichtlinien durchsetzen, bei Verlust Firmendaten gezielt löschen. BYOD wird durch Container-Konzepte unterstützt.", "statements": ["Viele unserer Mitarbeiter nutzen ihr privates Handy für die Arbeit. Wenn das verloren geht, sind Firmendaten für jeden zugänglich.", "Wir wollen BYOD einführen – aber wie trennen wir dann private von Firmendaten?"], "notIncluded": "Microsoft Intune-Lizenzen sind NICHT enthalten – muss der Kunde selbst lizenzieren. Kein Hardware-Support oder Gerätereparaturen. Keine Sonderkonfigurationen außerhalb Standard.", "bundleInfo": "Add-on Service – kein Bundle. Einzeln buchbar, ergänzt Managed User Services."}, {"id": "s34", "shortLabel": "Managed WiFi", "type": "service", "price": "35,90 € / Access Point / Monat", "context": "Zentrales Management aller WLAN-Access Points: Firmware-Updates, Konfigurationspflege, Betriebsüberwachung, Optimierung von Funkkanälen. Voraussetzung: kompatible Access Points und vorher durchgeführtes WiFi-Projekt.", "statements": ["Unser WLAN läuft manchmal super, manchmal schlecht – ob die Sicherheitseinstellungen noch aktuell sind, weiß ich nicht mehr.", "Wir haben ein Gäste-WLAN, aber ob das wirklich sicher vom Firmennetz getrennt ist, kann ich nicht beurteilen."], "notIncluded": "Hardware-Bereitstellung, physische Installation, Verkabelung und WLAN-Ausleuchtungsplanung sind NICHT enthalten – nur der laufende Betrieb bestehender Hardware.", "bundleInfo": "Add-on Service – kein Bundle. Einzeln buchbar pro Access Point."}];
+
+function shuffle(a) {
+  const b = [...a];
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+
+// ── state ──────────────────────────────────────────────────────────────────
+let deck = [];
+let reviewLater = [];
+let mastered = new Set();
+let current = null;
+let isFlipped = false;
+let phase = "start";
+
+// ── navigation ─────────────────────────────────────────────────────────────
+function buildDeck() {
+  deck = shuffle(CARDS.map(c => c.id));
+  reviewLater = [];
+  mastered = new Set();
+  current = null;
+  isFlipped = false;
+  phase = "quiz";
+  nextCard();
+}
+
+function nextCard() {
+  if (reviewLater.length > 0 && (deck.length === 0 || Math.random() < 0.4)) {
+    const idx = reviewLater.splice(0, 1)[0];
+    deck.splice(Math.min(2, deck.length), 0, idx);
+  }
+  if (deck.length === 0 && reviewLater.length === 0) {
+    phase = "done"; render(); return;
+  }
+  if (deck.length === 0) {
+    deck = shuffle([...reviewLater]); reviewLater = [];
+  }
+  current = deck.shift();
+  isFlipped = false;
+  render();
+}
+
+function flipCard()  { if (!isFlipped) { isFlipped = true; render(); } }
+function knew()      { mastered.add(current); nextCard(); }
+function again()     { reviewLater.push(current); nextCard(); }
+function skipCard()  { deck.push(current); nextCard(); }
+
+// ── safe text helper ────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── render ─────────────────────────────────────────────────────────────────
+function render() {
+  const root = document.getElementById("root");
+  const total = CARDS.length;
+
+  if (phase === "start") {
+    const bCount = CARDS.filter(c => c.type === "bundle").length;
+    const sCount = CARDS.filter(c => c.type === "service").length;
+    root.innerHTML =
+      '<div class="main">' +
+        '<div class="start-card">' +
+          '<h2>So funktioniert der Trainer</h2>' +
+          '<p>Auf der Vorderseite siehst du den Namen des Service oder Bundles.</p>' +
+          '<p>Schätze selbst ein, ob du den Inhalt kennst:<br>' +
+          '<strong style="color:var(--green)">✓ Kannte ich</strong> – Karte gilt als gemeistert.<br>' +
+          '<strong style="color:var(--text2)">↺ Nochmal üben</strong> – Karte kommt bald wieder.<br>' +
+          'Nutze <em>Rückseite anzeigen</em>, um Inhalt zu überprüfen.</p>' +
+          '<div class="start-stats">' +
+            '<div class="stat-box"><div class="stat-num">' + bCount + '</div><div class="stat-lbl">Bundles</div></div>' +
+            '<div class="stat-box"><div class="stat-num">' + sCount + '</div><div class="stat-lbl">Services</div></div>' +
+            '<div class="stat-box"><div class="stat-num">25</div><div class="stat-lbl">Karten gesamt</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="btn-start" onclick="buildDeck()">Alle 25 Karten starten →</button>' +
+      '</div>';
+    return;
+  }
+
+  if (phase === "done") {
+    root.innerHTML =
+      '<div class="main">' +
+        '<div class="result-card">' +
+          '<div class="result-ring">' +
+            '<div class="result-pct">100%</div>' +
+            '<div class="result-sub">' + total + ' / ' + total + '</div>' +
+          '</div>' +
+          '<div class="result-msg">Alle Karten gemeistert! 🎉</div>' +
+          '<div class="result-detail">Du kennst jetzt alle ' + total + ' Services und Bundles im Nösse-Portfolio.</div>' +
+        '</div>' +
+        '<button class="btn-start" onclick="buildDeck()">Nochmal von vorne →</button>' +
+      '</div>';
+    return;
+  }
+
+  // ── quiz screen ───────────────────────────────────────────────────────────
+  const card = CARDS.find(c => c.id === current);
+  if (!card) return;
+
+  const pct       = Math.round((mastered.size / total) * 100);
+  const remaining = deck.length + (reviewLater.length > 0 ? 1 : 0);
+  const badgeCls  = card.type === "bundle" ? "badge-bundle" : "badge-service";
+  const badgeTxt  = card.type === "bundle" ? "Bundle" : "Service";
+
+  // Progress area
+  const progressHtml =
+    '<div class="prog-row">' +
+      '<span>Gemeistert: <strong>' + mastered.size + ' / ' + total + '</strong></span>' +
+      '<span class="prog-right">' + pct + '%</span>' +
+    '</div>' +
+    '<div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div>' +
+    '<div class="counter-pill">' +
+      '<span class="cpill cp-green">✓ ' + mastered.size + ' gemeistert</span>' +
+      '<span class="cpill cp-red">↺ ' + reviewLater.length + ' zum Wiederholen</span>' +
+      '<span class="cpill cp-grey">☰ ' + remaining + ' verbleibend</span>' +
+    '</div>';
+
+  // Card front
+  const frontHtml =
+    '<span class="card-type-badge ' + badgeCls + '">' + badgeTxt + '</span>' +
+    '<div class="card-name">' + esc(card.shortLabel) + '</div>' +
+    '<div class="card-price">' + esc(card.price) + '</div>' +
+    '<div class="flip-hint">Karte antippen zum Umdrehen ↓</div>';
+
+  // Card back
+  const stmtsHtml = card.statements
+    .map(s => '<div class="stmt-item">\u201e' + esc(s) + '\u201c</div>')
+    .join('');
+
+  const backHtml =
+    '<div class="back-sec sec-desc">' +
+      '<div class="back-sec-title">Was ist das?</div>' +
+      '<div class="back-text">' + esc(card.context) + '</div>' +
+    '</div>' +
+    '<div class="back-sec sec-stmt">' +
+      '<div class="back-sec-title">Kunden sagen z.B.</div>' +
+      stmtsHtml +
+    '</div>' +
+    '<div class="back-sec sec-excl">' +
+      '<div class="back-sec-title">Nicht enthalten</div>' +
+      '<div class="excl-box">' + esc(card.notIncluded) + '</div>' +
+    '</div>' +
+    '<div class="back-sec sec-bundle">' +
+      '<div class="back-sec-title">Bundle-Zugehörigkeit</div>' +
+      '<div class="bundle-box">' + esc(card.bundleInfo) + '</div>' +
+    '</div>';
+
+  const flipBtnHtml = isFlipped
+    ? ''
+    : '<button class="btn-flip" onclick="event.stopPropagation();flipCard()">Rückseite anzeigen – Inhalt überprüfen ↓</button>';
+
+  root.innerHTML =
+    '<div class="main">' +
+      progressHtml +
+      '<div class="action-area">' +
+        '<button class="btn-knew" onclick="knew()">✓ Kannte ich</button>' +
+        '<button class="btn-again" onclick="again()">↺ Nochmal üben</button>' +
+      '</div>' +
+      '<div class="card-wrap" onclick="flipCard()">' +
+        '<div class="card-inner' + (isFlipped ? ' flipped' : '') + '">' +
+          '<div class="card-face">' + frontHtml + '</div>' +
+          '<div class="card-back">' + backHtml + '</div>' +
+        '</div>' +
+      '</div>' +
+      flipBtnHtml +
+      '<button class="btn-skip" onclick="skipCard()">Karte überspringen →</button>' +
+    '</div>';
+}
+
+render();
+</script>
+</body>
+</html>
