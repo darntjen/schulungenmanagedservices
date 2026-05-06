@@ -1,0 +1,655 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Preiskalkulator-Trainer – Nösse Datentechnik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1624;--bg2:#111f33;--bg3:#162844;
+      --border:#1e3354;--border2:#264466;
+      --green:#6abf4b;--gdim:#6abf4b18;--gdk:#3d7a27;
+      --red:#e05252;--rdim:#e0525218;
+      --blue:#4da8da;--bdim:#4da8da18;
+      --gold:#e8b84b;--ydim:#e8b84b18;
+      --teal:#4bc4b8;--tdim:#4bc4b818;--tdk:#2a7a72;
+      --orange:#e8873a;--odim:#e8873a18;
+      --purple:#b07fe8;--pdim:#b07fe818;
+      --text:#ddeeff;--text2:#8aacc8;--text3:#5a7a96;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+    button{font-family:inherit;cursor:pointer;border:none;}
+    input[type=number]{font-family:inherit;}
+    ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+    /* ── HEADER ── */
+    .site-header{background:linear-gradient(180deg,#0a1420,#0b1624);border-bottom:1px solid var(--border);padding:0 24px;}
+    .header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px;}
+    .hbadge{font-size:11px;background:var(--gdim);color:var(--green);border:1px solid var(--green);border-radius:4px;padding:3px 9px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;white-space:nowrap;}
+
+    /* ── HERO ── */
+    .hero-band{background:linear-gradient(135deg,#0d1e35,#0f2540,#122e4a);border-bottom:2px solid var(--gdk);padding:20px 24px 16px;text-align:center;}
+    .hero-band h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(18px,4vw,26px);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;margin-bottom:4px;}
+    .hero-band h1 span{color:var(--green);}
+    .hero-band p{font-size:13px;color:var(--text2);max-width:640px;margin:0 auto;line-height:1.6;}
+
+    .main{max-width:1100px;margin:0 auto;padding:24px 16px 60px;}
+
+    /* ── BACK BAR ── */
+    .back-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+    .btn-back{background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;transition:all .15s;}
+    .btn-back:hover{border-color:var(--text2);color:var(--text);}
+    .back-label{font-size:11px;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;}
+
+    /* ── SELECTION SCREENS (TG / SG / PICK) ── */
+    .sel-intro-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#fff;margin-bottom:5px;}
+    .sel-intro-sub{font-size:13px;color:var(--text2);line-height:1.6;max-width:580px;margin-bottom:20px;}
+    .card-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:620px){.card-grid-2{grid-template-columns:1fr;}}
+    .sel-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:22px 20px;cursor:pointer;transition:all .18s;user-select:none;}
+    .sel-card:hover{background:var(--bg3);transform:translateY(-2px);}
+    .sel-card-num{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;}
+    .sel-card-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:9px;}
+    .sel-card-desc{font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:12px;}
+    .sel-card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:13px;}
+    .sel-tag{font-size:11px;font-weight:600;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:2px 8px;color:var(--text3);}
+    .sel-cta{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+
+    /* TG colors */
+    .tg1-card{border-top:4px solid var(--blue);} .tg1-card .sel-card-num{color:var(--blue);} .tg1-card .sel-cta{color:var(--blue);}
+    .tg2-card{border-top:4px solid var(--green);} .tg2-card .sel-card-num{color:var(--green);} .tg2-card .sel-cta{color:var(--green);}
+    /* SG colors */
+    .sg1-card{border-top:4px solid var(--teal);} .sg1-card .sel-card-num{color:var(--teal);} .sg1-card .sel-cta{color:var(--teal);}
+    .sg2-card{border-top:4px solid var(--purple);} .sg2-card .sel-card-num{color:var(--purple);} .sg2-card .sel-cta{color:var(--purple);}
+
+    /* PICK SCREEN */
+    .pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px;}
+    .pick-card{background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--accent,var(--green));border-radius:8px;padding:15px;cursor:pointer;transition:all .18s;user-select:none;}
+    .pick-card:hover{background:var(--bg3);border-color:var(--accent,var(--green));transform:translateY(-2px);}
+    .pick-num{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent,var(--green));margin-bottom:5px;}
+    .pick-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:3px;}
+    .pick-industry{font-size:11px;color:var(--text3);margin-bottom:8px;}
+    .pick-facts{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;}
+    .pick-fact{font-size:12px;color:var(--text2);}
+    .pick-hint{font-size:11px;color:var(--text3);font-style:italic;margin-bottom:8px;border-left:2px solid var(--border2);padding-left:8px;line-height:1.45;}
+    .pick-cta{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent,var(--green));}
+
+    /* ── QUIZ LAYOUT ── */
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+    @media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+
+    /* CUSTOMER CARD */
+    .customer-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;position:sticky;top:14px;}
+    .customer-header{padding:13px 16px 10px;border-bottom:1px solid var(--border);}
+    .customer-industry{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
+    .customer-name{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:#fff;}
+    .sg-pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-top:5px;}
+    .sg1-pill{background:var(--tdim);color:var(--teal);border:1px solid var(--tdk);}
+    .sg2-pill{background:var(--pdim);color:var(--purple);border:1px solid #6040a8;}
+    .facts-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:10px 16px;border-bottom:1px solid var(--border);}
+    .fact-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
+    .statements-box{padding:10px 16px;}
+    .stmts-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:7px;}
+    .stmt{font-size:13px;font-style:italic;color:var(--text2);line-height:1.55;border-left:2px solid var(--gold);padding-left:10px;margin-bottom:6px;}
+    .stmt:last-child{margin-bottom:0;}
+
+    /* ── SELECTOR ── */
+    .selector-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:15px;}
+    .sel-title{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:11px;}
+
+    /* Nösse Connect */
+    .nc-block{background:var(--odim);border:2px solid var(--orange);border-radius:7px;padding:9px 11px;margin-bottom:14px;}
+    .nc-block-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
+    .nc-hint{font-size:11px;color:var(--text2);margin-top:5px;line-height:1.45;}
+
+    /* Group separators */
+    .group-sep{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+    .group-sub{font-size:10px;color:var(--text3);font-style:italic;font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px;}
+    .group-lbl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid var(--border);}
+    .group-lbl.hornet-lbl{color:var(--teal);border-bottom-color:var(--tdk);}
+    .group-blk{margin-bottom:12px;}
+    .group-blk.hornet-blk{background:var(--tdim);border:1px solid var(--tdk);border-radius:6px;padding:9px 10px;}
+
+    /* Option rows */
+    .option-row{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);margin-bottom:4px;cursor:pointer;transition:all .14s;user-select:none;}
+    .option-row:hover:not(.locked){border-color:var(--border2);background:var(--bg3);}
+    .option-row.selected{background:var(--bg3);border-color:var(--green);}
+    .option-row.locked{opacity:.4;cursor:default;}
+    /* NC row */
+    .option-row.nc-row{border-color:var(--orange)!important;background:rgba(232,135,58,.07);}
+    .option-row.nc-row.selected{background:rgba(232,135,58,.18);}
+    .option-row.nc-row.selected .opt-check{border-color:var(--orange);background:var(--orange);}
+    .option-row.nc-row .opt-check{border-color:var(--orange);}
+    .option-row.nc-row.selected .opt-price{color:var(--orange);}
+    /* Check */
+    .opt-check{width:17px;height:17px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .14s;margin-top:2px;}
+    .option-row.selected .opt-check{border-color:var(--green);background:var(--green);}
+    .opt-check-inner{width:7px;height:7px;border-radius:50%;background:#0b1624;display:none;}
+    .option-row.selected .opt-check-inner{display:block;}
+    .opt-info{flex:1;min-width:0;}
+    .opt-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.2;}
+    .opt-sub{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.3;}
+    .opt-price{font-size:11px;color:var(--text3);margin-top:3px;}
+    .option-row.selected .opt-price{color:var(--green);}
+    /* Hornet rows */
+    .hornet-blk .option-row{background:rgba(11,22,36,.7);border-color:#1e4040;}
+    .hornet-blk .option-row:hover:not(.locked){border-color:var(--teal);}
+    .hornet-blk .option-row.selected{border-color:var(--teal);background:rgba(75,196,184,.12);}
+    .hornet-blk .option-row.selected .opt-check{border-color:var(--teal);background:var(--teal);}
+    .hornet-blk .option-row.selected .opt-price{color:var(--teal);}
+
+    /* ── QUANTITY INPUT (SG2) ── */
+    .qty-wrap{display:flex;align-items:center;gap:7px;margin-top:6px;flex-wrap:wrap;}
+    .qty-label{font-size:11px;color:var(--text3);white-space:nowrap;}
+    .qty-input{width:72px;background:var(--bg);border:1px solid var(--border2);border-radius:5px;color:var(--text);padding:4px 8px;font-size:13px;font-weight:600;text-align:right;transition:border .14s;}
+    .qty-input:focus{outline:none;border-color:var(--purple);}
+    .qty-input.valid{border-color:var(--green);}
+    .qty-input.warn{border-color:var(--gold);}
+    .qty-calc{font-size:11px;color:var(--text3);}
+    .qty-calc.pos{color:var(--green);font-weight:600;}
+
+    /* ── PRICE SUMMARY ── */
+    .price-summary{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:11px 13px;margin:12px 0 10px;}
+    .psrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+    .psrow.total{border-top:1px solid var(--border);padding-top:7px;margin-top:4px;margin-bottom:0;}
+    .ps-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);}
+    .ps-val{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--green);}
+    .ps-val.init{font-size:17px;color:var(--gold);}
+    .ps-sub{font-size:11px;color:var(--text3);}
+    .nc-warn-bar{background:var(--rdim);border:1px solid var(--red);border-radius:6px;padding:8px 11px;margin-bottom:9px;font-size:12px;color:var(--red);font-weight:600;}
+
+    .btn-submit{width:100%;padding:12px;background:var(--green);color:#0b1624;border-radius:6px;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:background .15s;}
+    .btn-submit:hover{background:#7dd65e;}
+    .btn-submit:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;}
+
+    /* ── FEEDBACK ── */
+    .feedback-wrap{margin-top:18px;}
+    .fb-header{background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:8px;padding:15px;margin-bottom:10px;}
+    .fb-price-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px;}
+    @media(max-width:580px){.fb-price-row{grid-template-columns:1fr 1fr;}}
+    .fb-price-box{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:9px 11px;}
+    .fb-price-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
+    .fb-price-val{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;}
+    .fb-price-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+    .fb-sec{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px;}
+    .fb-sec-title{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;}
+    .fbs-g .fb-sec-title{color:var(--green);} .fbs-r .fb-sec-title{color:var(--red);} .fbs-b .fb-sec-title{color:var(--blue);}
+    .fbi{font-size:13px;color:var(--text2);line-height:1.6;padding:6px 10px;border-radius:5px;margin-bottom:4px;}
+    .fbi:last-child{margin-bottom:0;}
+    .fbi-g{background:var(--gdim);border:1px solid var(--gdk);} .fbi-r{background:var(--rdim);border:1px solid var(--red);} .fbi-b{background:var(--bdim);border:1px solid var(--blue);}
+    .fb-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+    .btn-next{padding:10px 14px;background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:6px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;transition:all .15s;}
+    .btn-next:hover{border-color:var(--text2);color:var(--text);}
+
+    .site-footer{border-top:1px solid var(--border);padding:15px 24px;text-align:center;font-size:12px;color:var(--text3);margin-top:12px;}
+    .site-footer strong{color:var(--text2);}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <img src="data:image/png;base64,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" alt="Nösse" style="height:38px;display:block;"/>
+    <span class="hbadge">Preiskalkulator-Trainer</span>
+  </div>
+</header>
+<div class="hero-band">
+  <h1>Managed Services<span> – </span>Preiskalkulator-Trainer</h1>
+  <p>Wähle Zielgruppe und Schwierigkeitsgrad, such dir einen Kundenfall aus und entwickle das passende Angebot.</p>
+</div>
+<div class="main" id="app"></div>
+<footer class="site-footer">
+  <strong>Nösse Datentechnik GmbH &amp; Co. KG</strong>&nbsp;·&nbsp;Internes Vertriebstraining&nbsp;·&nbsp;Nicht zur Weitergabe an Kunden bestimmt
+</footer>
+
+<script>
+const SVC = {"mus": {"name": "Managed User Standard", "sub": "Endpoint Protection + Patch Management + Monitoring", "unit": "user", "price": 31.9, "group": "user"}, "mup": {"name": "Managed User Premium", "sub": "Standard + M365 Backup + E-Mail Security & Archivierung + Sichere Authentifizierung (Hornet Plan 3 inkl.)", "unit": "user", "price": 54.9, "group": "user"}, "mss": {"name": "Managed Server Standard", "sub": "Endpoint Protection + Patch Management + Monitoring für Server", "unit": "server", "price": 49.9, "group": "server"}, "msp": {"name": "Managed Server Premium", "sub": "Managed Server Standard + Immutable Cloud Backup (500 GB inkl.)", "unit": "server", "price": 89.9, "group": "server"}, "msecs": {"name": "Managed Security Standard", "sub": "Firewall Betrieb & Audit + M365 Tenant Baseline + AD Baseline & Security", "unit": "flat", "price": 199.9, "group": "security"}, "msecp": {"name": "Managed Security Premium", "sub": "Managed Security Standard + ITSB Security Manager + Schwachstellenmanagement", "unit": "flat", "price": 1590.0, "group": "security"}, "ep_u": {"name": "Endpoint Protection (User)", "sub": "XDR-Schutz + Richtlinienmanagement für Benutzergeräte", "unit": "user", "price": 14.9, "group": "einzeln"}, "pm_u": {"name": "Patch Management (User)", "sub": "Automatisierte Updates für Betriebssystem und Standardanwendungen", "unit": "user", "price": 14.9, "group": "einzeln"}, "mon_u": {"name": "Monitoring (User)", "sub": "Proaktive Überwachung aller Benutzergeräte", "unit": "user", "price": 7.9, "group": "einzeln"}, "ep_s": {"name": "Endpoint Protection (Server)", "sub": "XDR-Schutz + Richtlinienmanagement für Server", "unit": "server", "price": 19.9, "group": "einzeln"}, "pm_s": {"name": "Patch Management (Server)", "sub": "Kontrollierte Server-Updates mit definierten Wartungsfenstern", "unit": "server", "price": 19.9, "group": "einzeln"}, "mon_s": {"name": "Monitoring (Server)", "sub": "Proaktive Überwachung inkl. Backup-Status", "unit": "server", "price": 19.9, "group": "einzeln"}, "bak_s": {"name": "Server Backup", "sub": "Cloud Backup (Immutable, Wasabi) inkl. 500 GB + Wiederherstellungstests", "unit": "server", "price": 39.9, "group": "einzeln"}, "fw": {"name": "Firewall Betrieb & Regelwerksmanagement", "sub": "Firmware-Updates + Regelwerksaudit (jährl.) + Konfigurationsmanagement", "unit": "flat", "price": 129.9, "group": "einzeln"}, "m365b": {"name": "M365 Tenant Baseline & Audit", "sub": "Sichere M365-Grundkonfiguration + regelmäßige Überprüfung", "unit": "flat", "price": 49.9, "group": "einzeln"}, "adbase": {"name": "AD Baseline & Security Management", "sub": "Härtung von Passwort-/Gruppenrichtlinien + Kontrolle privilegierter Konten", "unit": "flat", "price": 49.9, "group": "einzeln"}, "itsb": {"name": "ITSB Security Manager", "sub": "Externer ISB: Risikobewertungen, Roadmap, ISMS-Aufbau, NIS2/ISO 27001 Begleitung", "unit": "flat", "price": 1190.0, "group": "einzeln"}, "svm": {"name": "Schwachstellenmanagement", "sub": "Grundservice: Basis-Scan + monatl. Report (Assetkosten separat)", "unit": "flat", "price": 499.0, "group": "einzeln"}, "svm_c": {"name": "Schwachstellenmanagement (Clients)", "sub": "Assetkosten Client-Systeme, zusätzlich zum Grundservice", "unit": "user", "price": 12.0, "group": "einzeln"}, "svm_s": {"name": "Schwachstellenmanagement (Server)", "sub": "Assetkosten Server-Systeme, zusätzlich zum Grundservice", "unit": "server", "price": 69.0, "group": "einzeln"}, "mdru": {"name": "MDR – User (24/7 SOC)", "sub": "Sophos MDR: 24/7 Security Operations Center für Benutzergeräte", "unit": "user", "price": 49.0, "group": "addon"}, "mdrs": {"name": "MDR – Server (24/7 SOC)", "sub": "Sophos MDR: 24/7 Security Operations Center für Server", "unit": "server", "price": 79.0, "group": "addon"}, "sat": {"name": "Security Awareness Training", "sub": "Phishing-Simulationen + Schulungsplattform (Hornetsecurity)", "unit": "user", "price": 11.9, "group": "addon"}, "mdm": {"name": "MDM – Mobile Device Management", "sub": "Microsoft Intune: Smartphones, Tablets, mobile PCs", "unit": "device", "price": 19.9, "group": "addon"}, "wifi": {"name": "Managed WiFi", "sub": "Zentrales Management von WLAN-Access Points inkl. Firmware", "unit": "ap", "price": 35.9, "group": "addon"}, "h2_mob": {"name": "Hornet Plan 2 – Enterprise", "sub": "Spam & Malware + ATP + Archivierung + Verschlüsselung | für Mobilnutzer ohne User-Bundle", "unit": "mob_user", "price": 4.5, "group": "hornet_mob"}, "h3_mob": {"name": "Hornet Plan 3 – Enterprise Backup", "sub": "Plan 2 + M365 Backup (Exchange, OneDrive, SharePoint) | für Mobilnutzer ohne User-Bundle", "unit": "mob_user", "price": 7.0, "group": "hornet_mob"}, "h4_up": {"name": "Hornet Upgrade: Plan 3 → Plan 4", "sub": "Teams Protection + AI Email Security Analyst + Permission Manager | Aufpreis auf Managed User Premium", "unit": "user", "price": 5.0, "group": "hornet_up"}, "nc": {"name": "Managed Nösse Connect", "sub": "Serviceplattform-Anbindung · garantierte Servicezeiten Mo–Fr 08–18 Uhr · SLA · Serviceportal · Fernwartungszugang", "unit": "flat", "price": 249.0, "group": "connect", "onboarding": 1200.0}};
+const SC  = [{"id": "tg1_1", "tg": "tg1", "name": "Zahnarztpraxis Dr. Mertens & Kollegen", "industry": "Gesundheitswesen · Zahnarzt · 3 Standorte", "color": "#4da8da", "solution_hint": "Bundle-Lösung – Praxis braucht Rundumschutz ohne IT-Know-how intern.", "facts": [{"icon": "👥", "label": "12 Benutzer (Behandler + Verwaltung)"}, {"icon": "🖥️", "label": "1 Server pro Standort (3 gesamt)"}, {"icon": "📱", "label": "6 Tablets (Patientenaufnahme)"}, {"icon": "📶", "label": "2 WLAN-APs pro Standort"}, {"icon": "☁️", "label": "Microsoft 365"}, {"icon": "📋", "label": "DSGVO + Kassenzulassung"}], "statements": ["\"Ich bin Zahnarzt, kein IT-Fachmann. Die EDV soll einfach laufen – und wenn etwas kaputt ist, muss sofort jemand helfen.\"", "\"Wir hatten letzte Woche eine Phishing-Mail, die fast jemand geöffnet hätte. Meine Assistentin wusste nicht, dass das gefährlich war.\"", "\"Patientendaten sind bei uns das Heiligste. Wenn die verloren gehen oder in falsche Hände geraten, bin ich als Arzt am Ende.\""], "quantities": {"user": 12, "server": 3, "device": 6, "mob_user": 0, "ap": 6, "tenant": 1}, "available": ["nc", "mus", "mup", "mss", "msp", "msecs", "sat", "mdm", "wifi", "msecp", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "mdru", "mdrs"], "eval": {"user_min": "mus", "user_ideal": "mup", "server_min": "mss", "server_ideal": "msp", "security_min": "msecs", "security_ideal": "msecs", "addons_required": [], "addons_recommended": ["mdm", "wifi", "sat"], "price_min": 1200, "price_max": 2200, "feedback": {"mus": "✓ Grundschutz für Benutzergeräte ist richtig. Premium wäre bei Patientendaten in M365 und DSGVO-Anforderungen die bessere Wahl.", "mup": "✓ Sehr gut! M365 Backup und sichere Authentifizierung sichern Patientenkommunikation und erfüllen DSGVO-Anforderungen.", "mss": "✓ Server-Grundschutz ist vorhanden. Bei Patientendaten auf 3 Servern ist Premium mit Immutable Backup die sichere Wahl.", "msp": "✓ Richtig! Patientendaten auf 3 Standort-Servern müssen gegen Ransomware und Ausfall abgesichert sein.", "msecs": "✓ Gut! DSGVO verlangt nachweisbare Sicherheitsmaßnahmen. Security Standard liefert Firewall-Kontrolle und M365 Baseline.", "msecp": "⚠ Security Premium ist für eine Zahnarztpraxis überdimensioniert. Kein NIS2-Bedarf, kein strategisches ISMS erforderlich.", "sat": "✓ Richtig! Die Phishing-Mail wurde explizit erwähnt – die Mitarbeiterin wusste nicht, was gefährlich ist. SAT ist hier Pflicht.", "mdm": "✓ Gut erkannt! 6 Tablets mit Patientendaten – Fernlöschung bei Verlust oder Diebstahl muss möglich sein.", "wifi": "✓ Richtig! 6 APs in 3 Standorten – Firmware-Updates und Sicherheitseinstellungen sind bei Patientendaten-WLAN kritisch.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_user": "Kein Benutzer-Bundle – Grundschutz für 12 Praxis-PCs fehlt vollständig.", "missing_server": "Kein Server-Bundle – Patientendaten auf 3 Servern ohne Schutz.", "missing_msecs": "Security Standard fehlt – DSGVO verlangt nachweisbare Schutzmaßnahmen für Patientendaten."}}, {"id": "tg1_2", "tg": "tg1", "name": "KFZ-Betrieb Hoffmann GmbH", "industry": "Kfz-Werkstatt & Handel · 22 Mitarbeiter", "color": "#e05252", "solution_hint": "Bundle-Lösung – Kfz-Betrieb mit Werkstattsystem und mobilen Technikern.", "facts": [{"icon": "👥", "label": "8 Büronutzer (Verwaltung + Verkauf)"}, {"icon": "🔧", "label": "14 Mechaniker – nur Tablet/Handy, kein PC"}, {"icon": "🖥️", "label": "1 Server (Werkstattsoftware, Kasse)"}, {"icon": "📱", "label": "14 Firmenhandys für Mechaniker"}, {"icon": "☁️", "label": "Microsoft 365 für alle 22 Mitarbeiter"}, {"icon": "🔥", "label": "DSL-Router als Firewall – nie konfiguriert"}], "statements": ["\"Die Mechaniker haben alle ein Firmenhandy und schauen damit ihre Aufträge an. Die brauchen keine Computer.\"", "\"Unser Werkstattsystem ist auf dem Server. Wenn der ausfällt, können wir keine Autos annehmen und nicht abrechnen.\"", "\"Die IT läuft bei uns so vor sich hin. Irgendwann haben wir mal jemanden gehabt, der was eingerichtet hat – aber das ist Jahre her.\""], "quantities": {"user": 8, "server": 1, "device": 14, "mob_user": 14, "ap": 0, "tenant": 1}, "available": ["nc", "mus", "mup", "mss", "msp", "mdm", "h2_mob", "h3_mob", "msecs", "msecp", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "mdru", "mdrs", "sat", "wifi"], "eval": {"user_min": "mus", "user_ideal": "mup", "server_min": "mss", "server_ideal": "msp", "security_min": null, "security_ideal": null, "addons_required": ["mdm"], "addons_recommended": ["h3_mob"], "hornet_mob_min": "h2_mob", "hornet_mob_ideal": "h3_mob", "price_min": 650, "price_max": 1100, "feedback": {"mus": "✓ Grundschutz für die 8 Büronutzer ist richtig.", "mup": "✓ Gut! Premium deckt auch M365 Backup und sichere Authentifizierung für Büronutzer ab.", "mss": "✓ Server-Grundschutz für die Werkstattsoftware ist vorhanden.", "msp": "✓ Sehr gut! Werkstattsoftware und Abrechnungsdaten auf dem Server brauchen Immutable Backup.", "mdm": "✓ Richtig! 14 Mechaniker-Handys mit Betriebsdaten – MDM mit Fernlöschung ist hier unverzichtbar.", "h2_mob": "✓ Vertretbar! Plan 2 bietet Spam & Malware + ATP + Archivierung für die Mechaniker-Mailboxen.", "h3_mob": "✓ Sehr gut! Plan 3 sichert zusätzlich die M365-Daten der Mechaniker gegen versehentliches Löschen.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_user": "Kein Benutzer-Bundle – 8 Büro-PCs ohne Schutz, Updates und Monitoring.", "missing_server": "Kein Server-Bundle – Werkstattsoftware und Kassensystem auf dem Server sind ungeschützt.", "missing_mdm": "MDM fehlt – der Kunde hat explizit Mechaniker-Handys als Arbeitsgerät erwähnt.", "missing_hornet_mob": "Die 14 Mechaniker-Mailboxen in M365 sind NICHT durch das User-Bundle abgedeckt! Mechaniker haben keinen PC, bekommen also kein Managed User Bundle. Ihre M365-Postfächer brauchen einen eigenen Hornet-Plan."}}, {"id": "tg1_3", "tg": "tg1", "name": "Architekturbüro Kern & Partner", "industry": "Architektur & Stadtplanung · 18 Mitarbeiter", "color": "#6abf4b", "solution_hint": "Bundle-Lösung – kreative Agentur mit großen Dateien und Projektdaten.", "facts": [{"icon": "👥", "label": "18 Benutzer (Architekten + Verwaltung)"}, {"icon": "🖥️", "label": "2 Server (CAD-Dateien, Projektarchiv)"}, {"icon": "☁️", "label": "Microsoft 365 + SharePoint (Externe Freigaben)"}, {"icon": "🔥", "label": "Firewall vorhanden – Einrichtung durch Ex-Mitarbeiter"}, {"icon": "📂", "label": "Externe Freigaben für Bauherren und Behörden"}, {"icon": "🏢", "label": "Kein IT-Personal – GF ist Architekt"}], "statements": ["\"Wir teilen Pläne und Dokumente mit Bauherren und Behörden über SharePoint. Irgendwann verliere ich den Überblick, wer auf was Zugriff hat.\"", "\"Unsere CAD-Dateien liegen auf dem Server. Die repräsentieren jahrelange Arbeit – wenn die weg sind, ist das ein Desaster.\"", "\"Wir nutzen Teams auch mit externen Partnern. Letzte Woche hat jemand einen komischen Link über Teams geteilt – ich wusste nicht, ob der sicher ist.\""], "quantities": {"user": 18, "server": 2, "device": 0, "mob_user": 0, "ap": 0, "tenant": 1}, "available": ["nc", "mus", "mup", "mss", "msp", "msecs", "h4_up", "msecp", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "mdru", "mdrs", "sat", "mdm", "wifi"], "eval": {"user_min": "mup", "user_ideal": "mup", "server_min": "mss", "server_ideal": "msp", "security_min": "msecs", "security_ideal": "msecs", "addons_required": ["h4_up"], "addons_recommended": [], "price_min": 1600, "price_max": 2600, "feedback": {"mus": "✗ Managed User Standard reicht nicht! Der Hornet Plan 4 Upgrade setzt MUP (Plan 3) als Basis voraus. Außerdem: M365 Backup für CAD-Dateien in OneDrive fehlt ohne Premium.", "mup": "✓ Richtig! MUP enthält Hornet Plan 3 – die Basis für den Plan 4 Upgrade mit Teams Protection und Permission Manager.", "mss": "✓ Server-Grundschutz für CAD-Dateien ist vorhanden.", "msp": "✓ Sehr gut! CAD-Archive repräsentieren jahrelange Arbeit – Immutable Backup ist hier absolut richtig.", "msecs": "✓ Gut! Firewall wurde durch einen Ex-Mitarbeiter eingerichtet – nie mehr geprüft. Security Standard bringt Audit und Kontrolle.", "msecp": "⚠ Security Premium ist für ein Architekturbüro dieser Größe überdimensioniert.", "h4_up": "✓ Exzellent! Der Kunde hat zwei klassische Plan-4-Probleme beschrieben: Teams Protection (kompromittierter Link in Teams-Chat) und Permission Manager (Überblick über SharePoint-Freigaben). Aufpreis: nur 5 € pro User auf MUP.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_user": "Kein Benutzer-Bundle – CAD-Workstations ohne Schutz.", "missing_server": "Kein Server-Bundle – jahrelange CAD-Archive auf 2 Servern ungeschützt.", "missing_msecs": "Security Standard fehlt – Firewall wurde nie geprüft, SharePoint-Freigaben unkontrolliert.", "missing_h4_up": "Hornet Plan 4 Upgrade fehlt! Der Kunde hat genau die zwei Kernprobleme von Plan 4 beschrieben: unkontrollierte Teams-Links und fehlender Überblick über SharePoint-Zugriffsrechte. Das ist die zentrale Upsell-Chance!"}}, {"id": "tg1_4", "tg": "tg1", "name": "Eventcatering Vogel GmbH", "industry": "Catering & Veranstaltungsservice · 35 MA", "color": "#e8b84b", "solution_hint": "Bundle-Lösung – Saisonbetrieb mit vielen Mobilgeräten und einfacher IT.", "facts": [{"icon": "👥", "label": "10 Büronutzer (Buchung, Verwaltung)"}, {"icon": "🦺", "label": "25 Servicekräfte – nur Smartphones"}, {"icon": "📱", "label": "25 Firmenhandys (Dienstpläne, Schichtapp)"}, {"icon": "🖥️", "label": "1 Server (Buchhaltung, Kundendaten)"}, {"icon": "☁️", "label": "Microsoft 365 für Büro + Servicekräfte"}, {"icon": "🔒", "label": "Keine IT-Verantwortung – läuft seit Jahren unkontrolliert"}], "statements": ["\"Meine Servicekräfte bekommen ihren Dienstplan über die Schicht-App aufs Handy. Die haben alle ein Firmenhandy, aber keinen Computer.\"", "\"Letzten Monat hat jemand unser Outlook-Passwort gehackt. Auf einmal wurden Massen-Mails verschickt – das war furchtbar peinlich.\"", "\"Unsere Kundendaten – Hochzeiten, Firmenfeiern, Kontakte – liegen auf dem Server. Das darf auf keinen Fall verloren gehen.\""], "quantities": {"user": 10, "server": 1, "device": 25, "mob_user": 25, "ap": 0, "tenant": 1}, "available": ["nc", "mus", "mup", "mss", "msp", "mdm", "sat", "h2_mob", "h3_mob", "msecs", "msecp", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "mdru", "mdrs", "wifi"], "eval": {"user_min": "mup", "user_ideal": "mup", "server_min": "mss", "server_ideal": "msp", "security_min": null, "security_ideal": null, "addons_required": ["mdm"], "addons_recommended": ["h3_mob"], "hornet_mob_min": "h2_mob", "hornet_mob_ideal": "h3_mob", "price_min": 850, "price_max": 1400, "feedback": {"mus": "✗ Managed User Standard reicht nicht! Das gehackte Outlook-Konto zeigt: sichere Authentifizierung (Hardware-MFA) ist dringend – das gibt es erst in Premium.", "mup": "✓ Richtig! Premium enthält Hardware-MFA – genau das, was nach dem Outlook-Hack dringend fehlt.", "mss": "✓ Server-Grundschutz für Kundendaten ist vorhanden.", "msp": "✓ Gut! Kundendaten (Hochzeiten, Firmenfeiern) auf dem Server müssen durch Immutable Backup gesichert sein.", "mdm": "✓ Richtig! 25 Firmenhandys der Servicekräfte – MDM ermöglicht Fernlöschung bei Verlust.", "sat": "✓ Sinnvoll! Das Konto wurde gehackt – Sensibilisierung der Mitarbeiter ist ein wichtiger nächster Schritt.", "h2_mob": "✓ Vertretbar! Plan 2 bietet ATP-Schutz für die 25 Servicekräfte-Mailboxen.", "h3_mob": "✓ Sehr gut! Plan 3 sichert zusätzlich die M365-Daten der Servicekräfte.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_user": "Kein Benutzer-Bundle – Büro-PCs und M365-Konten ohne Schutz.", "missing_server": "Kein Server-Bundle – Kundendaten auf dem Server ungeschützt.", "missing_mdm": "MDM fehlt – 25 Firmenhandys der Servicekräfte brauchen zentrale Verwaltung.", "missing_hornet_mob": "Die 25 Servicekräfte-Mailboxen sind NICHT durch das User-Bundle abgedeckt! Servicekräfte haben keinen PC – ihre M365-Postfächer brauchen einen eigenen Hornet-Plan."}}, {"id": "tg1_5", "tg": "tg1", "name": "Steuerberatung Nowak & Kollegen", "industry": "Steuerberatung · 14 Mitarbeiter", "color": "#b07fe8", "solution_hint": "Bundle-Lösung – Kanzlei mit Compliance-Druck und sensiblen Mandantendaten.", "facts": [{"icon": "👥", "label": "14 Benutzer"}, {"icon": "🖥️", "label": "1 Server (DATEV, Mandantenakten)"}, {"icon": "☁️", "label": "Microsoft 365"}, {"icon": "🔥", "label": "Professionelle Firewall"}, {"icon": "📋", "label": "StBerG + DSGVO Compliance-Pflicht"}, {"icon": "🏢", "label": "Keine IT intern – externer Dienstleister bisher"}], "statements": ["\"Wir haben Mandantendaten – Steuererklärungen, Bilanzen, alles. Wenn die gehackt werden oder verloren gehen, ist unsere Kanzlei am Ende.\"", "\"Unsere Cyberversicherung hat uns nach einer Sicherheitsüberprüfung aufgefordert, MFA einzuführen. Der bisherige IT-Dienstleister hat das nie umgesetzt.\"", "\"Ich will, dass meine Mitarbeiter regelmäßig geschult werden. Die klicken auf alles – ich habe Angst vor Phishing.\""], "quantities": {"user": 14, "server": 1, "device": 0, "mob_user": 0, "ap": 0, "tenant": 1}, "available": ["nc", "mus", "mup", "mss", "msp", "msecs", "sat", "msecp", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "mdru", "mdrs", "mdm", "wifi"], "eval": {"user_min": "mup", "user_ideal": "mup", "server_min": "mss", "server_ideal": "msp", "security_min": "msecs", "security_ideal": "msecs", "addons_required": ["sat"], "addons_recommended": [], "price_min": 1200, "price_max": 1900, "feedback": {"mus": "✗ Managed User Standard reicht nicht! Die Versicherungsauflage fordert MFA – das ist erst in Premium enthalten.", "mup": "✓ Richtig! Premium enthält Hardware-MFA – genau das, was die Versicherung fordert.", "mss": "✓ Server-Grundschutz für DATEV und Mandantenakten ist vorhanden.", "msp": "✓ Sehr gut! Mandantendaten brauchen Immutable Backup gegen Ransomware.", "msecs": "✓ Richtig! Firewall-Audit und M365 Baseline sichern die Compliance-Anforderungen der Kanzlei ab.", "msecp": "⚠ Security Premium geht über den Bedarf hinaus. Keine NIS2-Pflicht für eine Steuerberatung dieser Größe.", "sat": "✓ Richtig! Der Phishing-Bedarf und die Angst vor Klickverhalten wurden explizit genannt.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_user": "Kein Benutzer-Bundle – MFA-Anforderung der Versicherung kann nicht umgesetzt werden.", "missing_server": "Kein Server-Bundle – DATEV und Mandantenakten auf dem Server ungeschützt.", "missing_msecs": "Security Standard fehlt – Firewall und M365-Konfiguration nie überprüft.", "missing_sat": "Security Awareness Training fehlt – der Schulungsbedarf wurde explizit als Angst der GF genannt."}}, {"id": "tg1_6", "tg": "tg1", "name": "Wohnungsbaugesellschaft Stadtrand mbH", "industry": "Wohnungsverwaltung · 28 Mitarbeiter · 3 Standorte", "color": "#4bc4b8", "solution_hint": "Bundle-Lösung – Verwaltungsgesellschaft mit verteilten Standorten und Außendienstmitarbeitern.", "facts": [{"icon": "👥", "label": "20 Büronutzer (3 Standorte)"}, {"icon": "🏗️", "label": "8 Hausmeister – nur Smartphones"}, {"icon": "🖥️", "label": "2 Server (ERP, Mieterdaten)"}, {"icon": "📱", "label": "8 Firmenhandys für Hausmeister"}, {"icon": "☁️", "label": "Microsoft 365 für alle"}, {"icon": "🔥", "label": "Firewall an Hauptstandort"}], "statements": ["\"Unsere Hausmeister haben Firmenhandys und koordinieren darüber Reparaturen und Mietertermine. Die brauchen keinen PC.\"", "\"Mieterdaten, Mietverträge, Bankverbindungen – alles liegt auf unseren Servern. Wenn da etwas passiert, stehen wir vor riesigen Problemen.\"", "\"Wir haben seit Kurzem eine neue Geschäftsführerin. Die will wissen, ob unsere IT wirklich sicher ist – ich kann das ehrlich gesagt nicht beantworten.\""], "quantities": {"user": 20, "server": 2, "device": 8, "mob_user": 8, "ap": 0, "tenant": 1}, "available": ["nc", "mus", "mup", "mss", "msp", "msecs", "mdm", "h2_mob", "h3_mob", "msecp", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "mdru", "mdrs", "sat", "wifi"], "eval": {"user_min": "mus", "user_ideal": "mup", "server_min": "mss", "server_ideal": "msp", "security_min": "msecs", "security_ideal": "msecs", "addons_required": ["mdm"], "addons_recommended": ["h3_mob"], "hornet_mob_min": "h2_mob", "hornet_mob_ideal": "h3_mob", "price_min": 1400, "price_max": 2400, "feedback": {"mus": "✓ Grundschutz für Büronutzer vorhanden. Premium wäre bei Mieterdaten in M365 und der Frage der GF nach Sicherheit empfehlenswert.", "mup": "✓ Sehr gut! MFA und M365 Backup passen zur Aussage der neuen GF – belegbare Sicherheitsmaßnahmen.", "mss": "✓ Server-Grundschutz für Mieterdaten vorhanden.", "msp": "✓ Richtig! Mieterdaten inkl. Bankverbindungen auf 2 Servern brauchen Immutable Backup.", "msecs": "✓ Gut erkannt! Die neue GF will Klarheit über die IT-Sicherheit – Security Standard liefert Firewall-Audit und M365 Baseline als Nachweis.", "msecp": "⚠ Security Premium ist für eine Wohnungsbaugesellschaft dieser Größe überdimensioniert.", "mdm": "✓ Richtig! 8 Hausmeister-Handys mit Mieterdaten und Termindaten – MDM mit Fernlöschung ist notwendig.", "h2_mob": "✓ Vertretbar! Plan 2 bietet ATP-Schutz für Hausmeister-Mailboxen.", "h3_mob": "✓ Sehr gut! Plan 3 sichert M365-Daten der Hausmeister zusätzlich ab.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_user": "Kein Benutzer-Bundle – 20 Büroarbeitsplätze ohne Schutz.", "missing_server": "Kein Server-Bundle – Mieterdaten und Bankverbindungen auf 2 Servern ungeschützt.", "missing_mdm": "MDM fehlt – 8 Hausmeister-Handys mit Mieterdaten brauchen zentrale Verwaltung.", "missing_hornet_mob": "Hausmeister-Mailboxen sind NICHT durch das User-Bundle abgedeckt! Hausmeister haben keinen PC – ihre M365-Postfächer brauchen einen separaten Hornet-Plan."}}, {"id": "tg1_7", "tg": "tg1", "name": "Spedition Fischer Transporte GmbH", "industry": "Transport & Logistik · 55 Mitarbeiter", "color": "#e8a74b", "solution_hint": "Bundle-Lösung – Spedition mit Bürobelegschaft und vielen Fahrern ohne PC.", "facts": [{"icon": "👥", "label": "20 Büronutzer (Disposition, Verwaltung)"}, {"icon": "🚛", "label": "35 Fahrer – nur Smartphone, kein PC"}, {"icon": "🖥️", "label": "2 Server (TMS, Abrechnungssystem)"}, {"icon": "📱", "label": "35 Firmenhandys (TMS-App, Auftragszettel)"}, {"icon": "🔥", "label": "Firewall – Einrichtung durch Ex-Dienstleister"}, {"icon": "☁️", "label": "Microsoft 365 für Büro + Fahrer"}], "statements": ["\"Unsere Fahrer haben alle ein Firmenhandy und empfangen ihre Aufträge darüber. Die sitzen nicht am PC.\"", "\"Unser Transportmanagementsystem ist geschäftskritisch. Wenn das ausfällt, können wir keine Aufträge mehr verteilen.\"", "\"Wir bekommen von Kunden immer öfter Fragebögen zur IT-Sicherheit. Die wollen wissen, ob wir zertifiziert sind oder zumindest grundlegende Maßnahmen haben.\""], "quantities": {"user": 20, "server": 2, "device": 35, "mob_user": 35, "ap": 0, "tenant": 1}, "available": ["nc", "mus", "mup", "mss", "msp", "msecs", "mdm", "sat", "h2_mob", "h3_mob", "msecp", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "mdru", "mdrs", "wifi"], "eval": {"user_min": "mus", "user_ideal": "mup", "server_min": "mss", "server_ideal": "msp", "security_min": "msecs", "security_ideal": "msecs", "addons_required": ["mdm"], "addons_recommended": ["h3_mob"], "hornet_mob_min": "h2_mob", "hornet_mob_ideal": "h3_mob", "price_min": 1800, "price_max": 3200, "feedback": {"mus": "✓ Grundschutz für Büronutzer vorhanden.", "mup": "✓ Sehr gut! MFA in Premium unterstützt die Kundenfragebogen-Anforderungen nach nachweisbarer IT-Sicherheit.", "mss": "✓ Server-Grundschutz für TMS vorhanden.", "msp": "✓ Richtig! TMS ist geschäftskritisch – Immutable Backup ist hier unverzichtbar.", "msecs": "✓ Richtig! Kundenfragebogen fordern nachweisbare IT-Sicherheit – Firewall-Audit und M365 Baseline liefern genau das.", "msecp": "⚠ Security Premium ist aktuell überdimensioniert – für die Fragebögen reicht Security Standard.", "mdm": "✓ Richtig! 35 Fahrer-Handys mit Auftragsapp und Firmendaten brauchen zentrale Verwaltung.", "sat": "ℹ Sinnvoll – Fahrer sind häufig Phishing-Ziele, besonders bei Zahlungsaufforderungen.", "h2_mob": "✓ Vertretbar! Plan 2 schützt Fahrer-Mailboxen mit ATP.", "h3_mob": "✓ Sehr gut! Plan 3 sichert M365-Daten der Fahrer zusätzlich ab.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_user": "Kein Benutzer-Bundle – 20 Büroarbeitsplätze ohne Schutz.", "missing_server": "Kein Server-Bundle – TMS auf 2 Servern ohne Schutz. Bei Ausfall steht der Betrieb still.", "missing_mdm": "MDM fehlt – 35 Fahrer-Handys mit Auftragsdaten brauchen zentrale Verwaltung.", "missing_hornet_mob": "Fahrer-Mailboxen NICHT durch User-Bundle abgedeckt! Fahrer haben keinen PC – ihre 35 M365-Postfächer brauchen einen separaten Hornet-Plan."}}, {"id": "tg2_1", "tg": "tg2", "name": "Schulz Maschinenbau AG", "industry": "Maschinenbau · Produktion · 180 Mitarbeiter · NIS2", "color": "#e05252", "solution_hint": "Individuell – NIS2-Pflicht erfordert strategische Einzelkomponenten, kein einfaches Bundle.", "facts": [{"icon": "👥", "label": "180 Benutzer (Büro + Produktion)"}, {"icon": "🖥️", "label": "12 Server (ERP SAP, CAD, Produktion)"}, {"icon": "📶", "label": "6 WLAN-Access Points (Produktion)"}, {"icon": "☁️", "label": "Microsoft 365 + lokales AD"}, {"icon": "🔥", "label": "Fortinet Firewall (Cluster)"}, {"icon": "⚠️", "label": "NIS2 wahrscheinlich betroffen (Fertigung > 50 MA)"}], "statements": ["\"Wir haben intern einen IT-Leiter und zwei Admins. Aber für NIS2 brauchen wir einen externen ISB – das können wir intern nicht stemmen.\"", "\"Unser SOC-Team überwacht zwar Alarme, aber bei einem echten Angriff in der Nacht weiß ich nicht, ob wir schnell genug reagieren. Ich will professionelle 24/7-Reaktion.\"", "\"Wir wollen wissen, wo unsere verwundbaren Stellen sind – nicht erst wenn jemand bei uns eingedrungen ist.\""], "quantities": {"user": 180, "server": 12, "device": 0, "mob_user": 0, "ap": 6, "tenant": 1}, "available": ["nc", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "mdru", "mdrs", "wifi", "mus", "mup", "mss", "msp", "msecs", "msecp", "sat", "mdm"], "eval": {"user_min": null, "user_ideal": null, "server_min": null, "server_ideal": null, "security_min": null, "security_ideal": null, "addons_required": ["itsb", "svm", "mdru", "mdrs"], "addons_recommended": ["wifi"], "price_min": 18000, "price_max": 35000, "feedback": {"ep_u": "✓ Endpoint Protection für 180 User-Geräte ist fundamental.", "pm_u": "✓ Patch Management für Benutzergeräte ist wichtig für NIS2-Compliance.", "mon_u": "✓ User-Monitoring ergänzt die Sicherheitsüberwachung sinnvoll.", "ep_s": "✓ Endpoint Protection auf 12 SAP-/ERP-Servern ist zwingend.", "pm_s": "✓ Server-Patching in kontrollierten Fenstern schützt Produktionssysteme.", "mon_s": "✓ Server-Monitoring mit Backup-Status ist bei Produktionssystemen kritisch.", "bak_s": "✓ Richtig! 12 Server mit SAP und CAD-Daten brauchen Immutable Backup.", "fw": "✓ Richtig! Firewall-Betrieb und jährliches Audit ist bei einem Cluster-System besonders wichtig.", "m365b": "✓ M365 Tenant Baseline stärkt die NIS2-Compliance im Cloud-Bereich.", "adbase": "✓ AD Baseline ist bei einem Produktionsunternehmen mit 180 Usern und lokalem AD kritisch.", "itsb": "✓ Sehr gut! Der IT-Leiter hat es klar gesagt – für NIS2 brauchen sie einen externen ISB. Das ist die Kernleistung.", "svm": "✓ Richtig! Schwachstellenmanagement-Grundservice ist der erste Schritt.", "svm_c": "✓ Client-Asset-Kosten für 180 User – notwendig für vollständige Schwachstellenanalyse.", "svm_s": "✓ Server-Asset-Kosten für 12 Server – NIS2 fordert strukturiertes Schwachstellenmanagement.", "mdru": "✓ Richtig! 24/7 MDR für 180 Benutzergeräte – der IT-Leiter hat 24/7-Reaktion explizit gefordert.", "mdrs": "✓ Richtig! 24/7 MDR für 12 Produktionsserver – Angriffsreaktion in der Nacht war konkret erwähnt.", "wifi": "✓ Managed WiFi für 6 APs in der Produktion – Firmware-Updates in industriellen Umgebungen oft vernachlässigt.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_itsb": "ITSB Security Manager fehlt – der IT-Leiter hat explizit gesagt, dass sie für NIS2 einen externen ISB benötigen. Das ist die wichtigste Einzelkomponente!", "missing_svm": "Schwachstellenmanagement fehlt – der Wunsch, verwundbare Stellen zu kennen, wurde direkt geäußert.", "missing_mdru": "MDR User fehlt – 24/7-Reaktion wurde ausdrücklich gefordert.", "missing_mdrs": "MDR Server fehlt – nächtliche Reaktion auf Produktionsserver wurde erwähnt."}}, {"id": "tg2_2", "tg": "tg2", "name": "Brandt & Associates Rechtsanwälte", "industry": "Kanzlei · Wirtschaftsrecht · 95 Mitarbeiter", "color": "#4da8da", "solution_hint": "Individuell – Kanzlei auf ISO-27001-Weg braucht strategische Einzelservices, kein Standard-Bundle.", "facts": [{"icon": "👥", "label": "95 Benutzer (Anwälte + Assistenz)"}, {"icon": "🖥️", "label": "4 Server (Dokumentenmanagement, E-Mail)"}, {"icon": "☁️", "label": "Microsoft 365 + Exchange on-premises hybrid"}, {"icon": "🔥", "label": "Palo Alto Firewall"}, {"icon": "📋", "label": "ISO 27001 Zertifizierung angestrebt"}, {"icon": "🛡️", "label": "IT-Leitung + 1 Admin"}], "statements": ["\"Wir streben ISO 27001 an – dafür brauchen wir einen externen ISB, der uns strukturiert aufbaut. Intern haben wir nicht die Kapazität.\"", "\"Wir haben einen externen Pentester beauftragt und der hat kritische Lücken gefunden. Ich will kontinuierlich wissen, wenn neue auftauchen.\"", "\"Die Anwälte sind das größte Risiko – die klicken auf alles. Ich brauche messbare Schulungen mit Reportings, die ich der Partnerschaft zeigen kann.\""], "quantities": {"user": 95, "server": 4, "device": 0, "mob_user": 0, "ap": 0, "tenant": 1}, "available": ["nc", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "sat", "mus", "mup", "mss", "msp", "msecs", "msecp", "mdru", "mdrs", "mdm", "wifi"], "eval": {"user_min": null, "user_ideal": null, "server_min": null, "server_ideal": null, "security_min": null, "security_ideal": null, "addons_required": ["itsb", "svm", "sat"], "addons_recommended": ["svm_c", "svm_s"], "price_min": 12000, "price_max": 22000, "feedback": {"ep_u": "✓ Endpoint Protection für 95 Anwalts-Workstations ist fundamental.", "pm_u": "✓ Patch Management für Benutzergeräte schließt bekannte Lücken.", "mon_u": "✓ User-Monitoring erkennt Probleme frühzeitig.", "ep_s": "✓ Endpoint Protection auf 4 Dokumenten- und E-Mail-Servern ist zwingend.", "pm_s": "✓ Server-Patching in kontrollierten Fenstern für Kanzlei-Infrastruktur.", "mon_s": "✓ Server-Monitoring inkl. Backup-Status ist bei kritischen Kanzleidaten wichtig.", "bak_s": "✓ Richtig! Mandakten und Dokumente auf 4 Servern brauchen Immutable Backup.", "fw": "✓ Firewall-Betrieb und -Audit unterstützt die ISO-27001-Anforderungen.", "m365b": "✓ M365 Tenant Baseline ist Teil der ISO-27001-Kontrollen.", "adbase": "✓ AD Baseline sichert privilegierte Konten – ISO 27001 Anforderung.", "itsb": "✓ Sehr gut! ISO 27001 ohne externen ISB ist nicht realistisch – genau das wurde gefordert.", "svm": "✓ Richtig! Nach dem Pentest: kontinuierliches Schwachstellenmanagement war der direkte Wunsch.", "svm_c": "✓ Client-Asset-Kosten für 95 User – für vollständige Abdeckung der Workstations.", "svm_s": "✓ Server-Asset-Kosten für 4 Server – Pentest-Ergebnisse müssen kontinuierlich verfolgt werden.", "sat": "✓ Richtig! Messbare Schulungen mit Reporting für die Partnerschaft – genau das bietet SAT.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_itsb": "ITSB Security Manager fehlt – ISO 27001 wurde direkt als Ziel genannt. Ohne externen ISB ist das nicht umsetzbar.", "missing_svm": "Schwachstellenmanagement fehlt – nach einem Pentest ist kontinuierliches VM die logische Konsequenz.", "missing_sat": "Security Awareness Training fehlt – messbare Schulungen mit Reporting wurden ausdrücklich gefordert."}}, {"id": "tg2_3", "tg": "tg2", "name": "Creative Hub Media GmbH", "industry": "Medienagentur · Digital Marketing · 62 Mitarbeiter", "color": "#a67ce8", "solution_hint": "Individuell – IT-Leitung will gezielt Teams & SharePoint absichern und Awareness aufbauen.", "facts": [{"icon": "👥", "label": "62 Benutzer (Kreative, Projektmanager, Sales)"}, {"icon": "🖥️", "label": "2 Server (Kreativarchiv, Rendering)"}, {"icon": "💬", "label": "Teams als zentrale Kommunikationsplattform (auch extern)"}, {"icon": "☁️", "label": "Microsoft 365 – SharePoint für Kunden-Kollaboration"}, {"icon": "🔒", "label": "IT-Leiter + 1 Junior Admin"}, {"icon": "📤", "label": "Externe Freigaben an Kunden täglich"}], "statements": ["\"Wir nutzen Teams intensiv – auch mit Kunden und Freelancern. Der IT-Leiter hat festgestellt, dass da schon schädliche Links geteilt wurden.\"", "\"SharePoint-Zugriffsrechte sind bei uns ein Chaos. Jeder hat alles freigegeben. Ich weiß nicht, wer auf welche Kundenprojekte Zugriff hat.\"", "\"Ich will ein monatliches Report-Dashboard für die Geschäftsführung. Die soll sehen, wie sich die Sicherheitslage entwickelt.\""], "quantities": {"user": 62, "server": 2, "device": 0, "mob_user": 0, "ap": 0, "tenant": 1}, "available": ["nc", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "m365b", "adbase", "svm", "svm_c", "sat", "h4_up", "mus", "mup", "mss", "msp", "msecs", "msecp", "fw", "itsb", "svm_s", "mdru", "mdrs", "mdm", "wifi"], "eval": {"user_min": null, "user_ideal": null, "server_min": null, "server_ideal": null, "security_min": null, "security_ideal": null, "addons_required": ["m365b", "h4_up"], "addons_recommended": ["svm", "svm_c", "sat"], "price_min": 5000, "price_max": 10000, "feedback": {"ep_u": "✓ Endpoint Protection für 62 kreative Workstations ist die Basis.", "pm_u": "✓ Patch Management sichert Betriebssysteme und kreative Anwendungen.", "mon_u": "✓ User-Monitoring erkennt Probleme frühzeitig.", "ep_s": "✓ Rendering- und Kreativarchiv-Server müssen geschützt sein.", "pm_s": "✓ Server-Patching im kontrollierten Fenster schützt Rendering-Jobs.", "mon_s": "✓ Server-Monitoring inklusive Backup-Status für Kreativarchiv.", "bak_s": "✓ Gut! Das Kreativarchiv auf 2 Servern braucht Immutable Backup.", "m365b": "✓ Sehr gut! M365 Tenant Baseline kontrolliert externe SharePoint-Freigaben – direkt das genannte Problem.", "adbase": "✓ AD Baseline sichert Berechtigungen – sinnvoll bei Chaos in SharePoint-Rechten.", "svm": "✓ Schwachstellenmanagement liefert monatliche Reports für die GF – das war ein direkter Wunsch.", "svm_c": "✓ Client-Asset-Kosten für vollständige Schwachstellenanalyse der 62 Workstations.", "sat": "✓ Gut! Schulungen mit Reporting passen zum Wunsch nach Transparenz für die GF.", "h4_up": "✓ Sehr gut erkannt! Teams Protection schützt vor schädlichen Links in Team-Chats (explizit genannt). Permission Manager löst das SharePoint-Rechte-Chaos. Aufpreis nur 5 € / User auf MUP – Voraussetzung ist MUP als Basis.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_m365b": "M365 Tenant Baseline fehlt – das SharePoint-Freigabe-Chaos wurde explizit genannt. Das ist die Kernantwort.", "missing_h4_up": "Hornet Plan 4 Upgrade fehlt! Teams Protection und Permission Manager lösen direkt die beiden genannten Probleme: schädliche Links in Teams und unkontrollierte SharePoint-Zugriffsrechte."}}, {"id": "tg2_4", "tg": "tg2", "name": "Sonnenhof Pflegeverbund GmbH", "industry": "Pflege & Sozialwesen · 5 Einrichtungen · 220 MA", "color": "#6abf4b", "solution_hint": "Individuell – Multistandort-Pflegeeinrichtung mit DSGVO-Druck und vielen Mobilnutzern.", "facts": [{"icon": "👥", "label": "60 Verwaltungsnutzer (5 Standorte)"}, {"icon": "🦺", "label": "160 Pflegekräfte – Tablets & Smartphones"}, {"icon": "🖥️", "label": "5 Server (je ein Standort, Pflegedoku)"}, {"icon": "📱", "label": "160 Firmengeräte für Pflegekräfte"}, {"icon": "☁️", "label": "Microsoft 365 + Pflegedokumentations-App"}, {"icon": "📋", "label": "SGB XI, DSGVO, Heimaufsicht"}], "statements": ["\"Pflegekräfte arbeiten ausschließlich mit Tablets – die haben keinen PC und sehen nie einen Bürorechner.\"", "\"Wir haben 5 Standorte und auf jedem liegt die lokale Pflegedokumentation. Wenn ein Server ausfällt, können wir dort nicht mehr dokumentieren.\"", "\"Die Heimaufsicht hat uns klar gemacht: wenn Patientendaten verloren gehen oder in falsche Hände geraten, drohen uns Sanktionen und Entzug der Betriebserlaubnis.\""], "quantities": {"user": 60, "server": 5, "device": 160, "mob_user": 160, "ap": 0, "tenant": 1}, "available": ["nc", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "m365b", "adbase", "mdm", "h3_mob", "mus", "mup", "mss", "msp", "msecs", "msecp", "fw", "itsb", "svm", "svm_c", "svm_s", "mdru", "mdrs", "sat", "wifi"], "eval": {"user_min": null, "user_ideal": null, "server_min": null, "server_ideal": null, "security_min": null, "security_ideal": null, "addons_required": ["mdm", "h3_mob", "bak_s"], "addons_recommended": ["m365b"], "hornet_mob_min": "h3_mob", "hornet_mob_ideal": "h3_mob", "price_min": 7000, "price_max": 13000, "feedback": {"ep_u": "✓ Endpoint Protection für 60 Verwaltungs-PCs ist die Basis.", "pm_u": "✓ Patch Management für Verwaltungs-Workstations.", "mon_u": "✓ User-Monitoring für Verwaltungsgeräte.", "ep_s": "✓ Endpoint Protection auf 5 Pflegedoku-Servern ist zwingend.", "pm_s": "✓ Server-Patching für alle 5 Standortserver.", "mon_s": "✓ Server-Monitoring erkennt Ausfälle der Pflegedokumentation frühzeitig.", "bak_s": "✓ Sehr gut! 5 lokale Pflegedokumentation-Server brauchen Immutable Backup – Heimaufsicht explizit genannt.", "m365b": "✓ M365 Tenant Baseline sichert die Cloud-Umgebung der Verwaltung.", "adbase": "✓ AD Baseline sichert Zugriffsrechte über alle 5 Standorte.", "mdm": "✓ Richtig! 160 Pflegekräfte-Geräte mit Patientendaten brauchen MDM mit Fernlöschung – unverzichtbar.", "h3_mob": "✓ Sehr gut! Plan 3 sichert die M365-Daten der 160 Pflegekräfte. Sie haben keinen PC, also kein User-Bundle – der Hornet-Plan ist zwingend.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_bak_s": "Server Backup fehlt – 5 Standort-Server mit Pflegedokumentation ohne Backup. Heimaufsicht hat Sanktionen angedroht!", "missing_mdm": "MDM fehlt – 160 Pflegekräfte-Geräte mit Patientendaten brauchen zentrale Verwaltung und Fernlöschung.", "missing_hornet_mob": "Hornet-Plan für Pflegekräfte-Mailboxen fehlt! Pflegekräfte haben keinen PC – ihre 160 M365-Postfächer sind NICHT durch Endpoint-Services abgedeckt. Hornet Plan 3 ist hier zwingend."}}, {"id": "tg2_5", "tg": "tg2", "name": "Merkur Handels AG", "industry": "Großhandel · B2B · 200 Mitarbeiter · Außendienst", "color": "#e8b84b", "solution_hint": "Individuell – Handelsunternehmen mit komplexem ERP, Außendienst und Compliance-Druck.", "facts": [{"icon": "👥", "label": "120 Büronutzer (Einkauf, Verkauf, Verwaltung)"}, {"icon": "🚗", "label": "80 Außendienstmitarbeiter – Laptops + Handys"}, {"icon": "🖥️", "label": "8 Server (SAP ERP, Warenwirtschaft)"}, {"icon": "📱", "label": "80 Smartphones (Außendienst + CRM-App)"}, {"icon": "🔥", "label": "Cisco Firewall (Cluster)"}, {"icon": "☁️", "label": "Microsoft 365 + Azure AD + SAP"}], "statements": ["\"Der Außendienst ist unterwegs und greift von überall auf unser CRM und SAP zu. Das ist ein permanentes Sicherheitsrisiko.\"", "\"Wir haben intern einen IT-Leiter und 3 Admins. Aber Schwachstellenmanagement machen wir bisher nicht – nach zwei Ransomware-Vorfällen in unserer Branche macht mir das Sorgen.\"", "\"Ich will eine klare Übersicht, welche unserer Systeme verwundbar sind – monatlich, für mein Management-Reporting.\""], "quantities": {"user": 120, "server": 8, "device": 80, "mob_user": 0, "ap": 0, "tenant": 1}, "available": ["nc", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "svm", "svm_c", "svm_s", "mdm", "mdru", "mdrs", "mus", "mup", "mss", "msp", "msecs", "msecp", "itsb", "sat", "wifi"], "eval": {"user_min": null, "user_ideal": null, "server_min": null, "server_ideal": null, "security_min": null, "security_ideal": null, "addons_required": ["svm", "mdm"], "addons_recommended": ["svm_c", "svm_s", "mdrs"], "price_min": 12000, "price_max": 22000, "feedback": {"ep_u": "✓ Endpoint Protection für 120 Büro-Workstations ist fundamental.", "pm_u": "✓ Patch Management für Bürogeräte schließt bekannte Lücken.", "mon_u": "✓ User-Monitoring auf 120 Geräten.", "ep_s": "✓ Endpoint Protection auf 8 SAP-/ERP-Servern ist zwingend.", "pm_s": "✓ Server-Patching für SAP-Server in definierten Wartungsfenstern.", "mon_s": "✓ Server-Monitoring inkl. Backup-Status für SAP-Umgebung.", "bak_s": "✓ Richtig! SAP und Warenwirtschaft auf 8 Servern – Immutable Backup bei genanntem Ransomware-Risiko.", "fw": "✓ Firewall-Betrieb für Cisco-Cluster – regelmäßiges Audit schützt CRM/SAP-Zugriffe.", "m365b": "✓ M365 Tenant Baseline sichert Außendienst-Zugriffe über Azure AD.", "adbase": "✓ AD Baseline sichert privilegierte Konten in der SAP-Umgebung.", "svm": "✓ Sehr gut! Schwachstellenmanagement-Grundservice wurde als direkter Wunsch geäußert.", "svm_c": "✓ Client-Asset-Kosten für 120 User – vollständige Schwachstellenanalyse.", "svm_s": "✓ Server-Asset-Kosten für 8 Server – monatliches Reporting für Management.", "mdm": "✓ Richtig! 80 Außendienst-Smartphones mit CRM-Zugriff brauchen MDM mit Fernlöschung.", "mdru": "ℹ MDR User optional – sinnvoll bei mobilem Außendienst mit Ransomware-Risiko.", "mdrs": "✓ Gut erkannt! MDR auf 8 SAP-Servern nach zwei Ransomware-Vorfällen in der Branche sehr empfehlenswert.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_svm": "Schwachstellenmanagement fehlt – der IT-Leiter hat es direkt gefordert. Kernleistung verpasst!", "missing_mdm": "MDM fehlt – 80 Außendienst-Smartphones mit CRM-Zugriff brauchen zentrale Verwaltung."}}, {"id": "tg2_6", "tg": "tg2", "name": "Devcraft Software GmbH", "industry": "Softwareentwicklung · SaaS · 75 Mitarbeiter", "color": "#4bc4b8", "solution_hint": "Individuell – Tech-Unternehmen mit eigenen IT-Experten, gezieltem Schutz und hohen Standards.", "facts": [{"icon": "👥", "label": "75 Entwickler und DevOps-Engineers"}, {"icon": "🖥️", "label": "15 Server (Dev, Staging, CI/CD, Build)"}, {"icon": "☁️", "label": "Azure + GitHub + Microsoft 365"}, {"icon": "🔒", "label": "IT-Security-Team (2 Personen)"}, {"icon": "🔑", "label": "Kunden-SLAs mit Sicherheitsanforderungen"}, {"icon": "🏆", "label": "SOC2 Typ II Zertifizierung angestrebt"}], "statements": ["\"Wir entwickeln Software für Unternehmenskunden. Die verlangen Nachweise über unsere IT-Sicherheit. SOC2 ist unser nächstes Ziel.\"", "\"Unsere Server laufen alle in Azure – aber 15 Build-Server haben wir on-premises. Die brauchen den gleichen Schutzstandard.\"", "\"Ich will proaktiv wissen, welche CVEs unsere on-prem-Systeme betreffen – bevor es unser Kunde fragt.\""], "quantities": {"user": 75, "server": 15, "device": 0, "mob_user": 0, "ap": 0, "tenant": 1}, "available": ["nc", "ep_u", "pm_u", "ep_s", "pm_s", "mon_s", "bak_s", "m365b", "adbase", "itsb", "svm", "svm_s", "mdru", "mdrs", "mus", "mup", "mss", "msp", "msecs", "msecp", "mon_u", "fw", "svm_c", "sat", "mdm", "wifi"], "eval": {"user_min": null, "user_ideal": null, "server_min": null, "server_ideal": null, "security_min": null, "security_ideal": null, "addons_required": ["itsb", "svm", "svm_s"], "addons_recommended": ["ep_s", "mon_s", "bak_s", "mdrs"], "price_min": 10000, "price_max": 20000, "feedback": {"ep_u": "✓ Endpoint Protection für 75 Entwickler-Workstations ist wichtig.", "pm_u": "✓ Patch Management für Entwickler-PCs – bekannte CVEs schließen.", "ep_s": "✓ Richtig! 15 on-prem Build-Server mit gleichem Schutzstandard wie erwähnt.", "pm_s": "✓ Server-Patching für CI/CD- und Build-Server im kontrollierten Fenster.", "mon_s": "✓ Server-Monitoring für 15 Build- und Staging-Server.", "bak_s": "✓ Gut! Build- und Staging-Server mit Kundendaten brauchen Immutable Backup.", "m365b": "✓ M365 Tenant Baseline unterstützt SOC2-Anforderungen an Cloud-Konfiguration.", "adbase": "✓ AD Baseline sichert privilegierte Entwickler-Accounts.", "itsb": "✓ Sehr gut! SOC2 ohne externen ISB ist kaum machbar – ITSB begleitet den Zertifizierungsweg.", "svm": "✓ Richtig! Proaktives Schwachstellenmanagement wurde als konkreter Wunsch geäußert.", "svm_s": "✓ Server-Asset-Kosten für 15 on-prem Server – CVE-Tracking für Kunden-Reporting.", "mdru": "ℹ MDR User optional – Entwickler-Workstations als Angriffspunkt bei SaaS-Unternehmen.", "mdrs": "✓ Gut erkannt! MDR auf 15 CI/CD-Servern – Angriffe auf Build-Pipelines sind ein reales Risiko bei SaaS.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_itsb": "ITSB Security Manager fehlt – SOC2 wurde direkt als Ziel genannt. Externe ISB-Begleitung ist dafür notwendig.", "missing_svm": "Schwachstellenmanagement fehlt – CVE-Tracking wurde direkt gefordert.", "missing_svm_s": "Server-Asset-Kosten für das Schwachstellenmanagement fehlen – ohne diese werden die 15 on-prem Server nicht erfasst."}}, {"id": "tg2_7", "tg": "tg2", "name": "Transeuro Logistik Holding GmbH", "industry": "Logistik-Holding · 4 Gesellschaften · 350 Mitarbeiter", "color": "#b07fe8", "solution_hint": "Individuell – Holding-Struktur mit mehreren Gesellschaften erfordert individuelle Gesamtlösung.", "facts": [{"icon": "👥", "label": "200 Büronutzer (4 Gesellschaften)"}, {"icon": "🚛", "label": "150 Fahrer – nur Smartphones, kein PC"}, {"icon": "🖥️", "label": "10 Server (TMS, Zoll, Buchhaltung)"}, {"icon": "📱", "label": "150 Firmenhandys für Fahrer"}, {"icon": "🔥", "label": "Zentrale Firewall + 3 Außenstandorte"}, {"icon": "📋", "label": "DSGVO · Zoll-Compliance · wachsend"}], "statements": ["\"Wir haben 4 Gesellschaften. Jede hat ihre eigene IT, aber ich als CTO will eine einheitliche Sicherheitsstrategie.\"", "\"150 Fahrer haben Firmenhandys. Die brauchen ihre Auftrags-App, aber ich will, dass wenn ein Handy verloren geht, ich die Firmendaten sofort löschen kann.\"", "\"Ich will einen festen Ansprechpartner für IT-Sicherheit, der mit mir regelmäßig den Status bespricht und eine Roadmap entwickelt.\""], "quantities": {"user": 200, "server": 10, "device": 150, "mob_user": 150, "ap": 0, "tenant": 4}, "available": ["nc", "ep_u", "pm_u", "mon_u", "ep_s", "pm_s", "mon_s", "bak_s", "fw", "m365b", "adbase", "itsb", "svm", "svm_c", "svm_s", "mdm", "mdru", "mdrs", "h3_mob", "mus", "mup", "mss", "msp", "msecs", "msecp", "sat", "wifi"], "eval": {"user_min": null, "user_ideal": null, "server_min": null, "server_ideal": null, "security_min": null, "security_ideal": null, "addons_required": ["itsb", "mdm", "h3_mob"], "addons_recommended": ["svm", "bak_s", "mdrs"], "hornet_mob_min": "h3_mob", "hornet_mob_ideal": "h3_mob", "price_min": 22000, "price_max": 40000, "feedback": {"ep_u": "✓ Endpoint Protection für 200 Büronutzer über 4 Gesellschaften.", "pm_u": "✓ Patch Management für alle Bürogeräte.", "mon_u": "✓ User-Monitoring über alle 4 Gesellschaften.", "ep_s": "✓ Endpoint Protection auf 10 TMS-/Zoll-/Buchhaltungsservern.", "pm_s": "✓ Server-Patching für alle 10 Server.", "mon_s": "✓ Server-Monitoring inkl. Backup-Status für 10 Server.", "bak_s": "✓ Richtig! TMS, Zoll und Buchhaltung auf 10 Servern brauchen Immutable Backup.", "fw": "✓ Firewall-Betrieb für zentrale Firewall + 3 Außenstandorte.", "m365b": "✓ M365 Baseline für einheitlichen Sicherheitsstandard über alle 4 Tenants.", "adbase": "✓ AD Baseline für alle 4 Gesellschaften – einheitliche Richtlinien.", "itsb": "✓ Sehr gut! Der CTO hat es explizit gefordert: fester Ansprechpartner, regelmäßiger Status, Roadmap. Das ist der ITSB Security Manager.", "svm": "✓ Schwachstellenmanagement liefert den Sicherheitsstatus für CTO-Meetings.", "svm_c": "✓ Client-Asset-Kosten für 200 Büronutzer.", "svm_s": "✓ Server-Asset-Kosten für 10 Server.", "mdm": "✓ Richtig! 150 Fahrer-Handys mit Fernlöschung – wurde direkt gefordert.", "mdru": "ℹ MDR User optional – sinnvoll bei einer Holding mit erhöhtem Angriffsprofil.", "mdrs": "✓ Gut! MDR auf 10 Servern schützt kritische Holding-Infrastruktur.", "h3_mob": "✓ Sehr gut! 150 Fahrer-Mailboxen brauchen Hornet Plan 3 – sie haben keinen PC und sind NICHT durch das User-Bundle abgedeckt.", "nc": "✓ Richtig! Managed Nösse Connect ist die zwingende Voraussetzung für alle weiteren Services. Ohne Connect kein Service."}, "missing_itsb": "ITSB Security Manager fehlt! Der CTO hat es wörtlich gefordert – fester Ansprechpartner, regelmäßiger Status, Roadmap. Das ist die wichtigste Einzelkomponente.", "missing_mdm": "MDM fehlt – 150 Fahrer-Handys mit Fernlöschungsfunktion wurde direkt gefordert.", "missing_hornet_mob": "Hornet Plan 3 für Fahrer-Mailboxen fehlt! 150 Fahrer haben keinen PC und sind nicht durch Endpoint-Services abgedeckt. Ihre M365-Postfächer brauchen zwingend einen separaten Hornet-Plan."}}];
+
+// Unit labels for qty inputs
+const UNIT_LABEL = {
+  user:'Benutzer', server:'Server', device:'Geräte/Handys',
+  ap:'Access Points', mob_user:'Mobilnutzer', flat:null
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let phase      = "tg";       // tg | sg | pick | quiz
+let activeTg   = null;       // "tg1"|"tg2"
+let activeSg   = null;       // "sg1"|"sg2"
+let currentSc  = null;       // index in SC
+let selections = {};        // id -> bool
+let userQty    = {};         // id -> number (sg2 only)
+let submitted  = false;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function getQty(sc, id){
+  const s = SVC[id];
+  if(!s || s.unit === 'flat') return 1;
+  if(activeSg === 'sg2'){
+    const v = parseFloat(userQty[id]);
+    return isNaN(v) || v < 0 ? 0 : v;
+  }
+  const q = sc.quantities;
+  if(s.unit==='user')     return q.user||0;
+  if(s.unit==='server')   return q.server||0;
+  if(s.unit==='device')   return q.device||0;
+  if(s.unit==='ap')       return q.ap||0;
+  if(s.unit==='mob_user') return q.mob_user||0;
+  return 1;
+}
+function calcMonthly(sc, sel){
+  let t=0;
+  Object.keys(sel).forEach(id=>{
+    if(!sel[id]) return;
+    const s=SVC[id]; if(!s) return;
+    t += s.price * getQty(sc, id);
+  });
+  return t;
+}
+function calcInitial(sel){ return sel['nc'] ? 1200 : 0; }
+function fmtEur(n){ return (Math.round(n*100)/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+
+function basePriceLabel(id){
+  const s=SVC[id]; if(!s) return '';
+  return fmtEur(s.price)+(s.unit==='flat'?' / Monat'+(s.onboarding?' + '+fmtEur(s.onboarding)+' einmalig':''):'  / '+((UNIT_LABEL[s.unit])||'Einheit'));
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function pickTg(tg){ activeTg=tg; phase='sg'; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function pickSg(sg){ activeSg=sg; phase='pick'; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function pickScenario(idx){ currentSc=idx; selections={}; userQty={}; submitted=false; phase='quiz'; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function backToTg(){ phase='tg'; activeTg=null; activeSg=null; currentSc=null; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function backToSg(){ phase='sg'; activeSg=null; currentSc=null; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function backToPick(){ phase='pick'; submitted=false; selections={}; userQty={}; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function selectItem(id){
+  if(submitted) return;
+  const sc = SC[currentSc];
+  if(!sc.available.includes(id)) return;
+  const s = SVC[id];
+
+  // Within-tier mutual exclusion: only mus vs mup, mss vs msp, msecs vs msecp
+  const tierPairs = {'mus':'mup','mup':'mus','mss':'msp','msp':'mss','msecs':'msecp','msecp':'msecs'};
+  if(tierPairs[id]) selections[tierPairs[id]] = false;
+
+  if(!selections[id]){
+    // Turning ON
+    selections[id] = true;
+    if(activeSg === 'sg2' && SVC[id].unit !== 'flat') userQty[id] = userQty[id] || '';
+  } else {
+    // Turning OFF
+    selections[id] = false;
+    if(activeSg === 'sg2') delete userQty[id];
+  }
+  render();
+}
+
+function setQty(id, val){
+  userQty[id] = val;
+  // re-render price summary without full re-render to avoid losing focus
+  const ps = document.getElementById('price-summary-area');
+  const sc = SC[currentSc];
+  if(ps) ps.innerHTML = buildPriceSummary(sc);
+}
+
+// ── Feedback builder ──────────────────────────────────────────────────────────
+function buildFeedback(sc, sel){
+  const ev = sc.eval;
+  const monthly = calcMonthly(sc, sel);
+  const initial = calcInitial(sel);
+  const items = Object.keys(sel).filter(k=>sel[k]);
+  const correct=[], wrong=[], missing=[], upsell=[];
+
+  // NC
+  if(!sel['nc']){
+    missing.push('🔴 Managed Nösse Connect fehlt! Ohne Connect kann kein einziger Service gebucht werden. Monatlich: 249 € + einmalig 1.200 € Onboarding.');
+  } else {
+    correct.unshift({id:'nc', fb:'✓ Managed Nösse Connect gebucht – die Voraussetzung für alle Services. 249 € / Monat + 1.200 € Onboarding einmalig.'});
+  }
+
+  // SG2 quantity checks
+  if(activeSg === 'sg2'){
+    items.filter(id=>id!=='nc').forEach(id=>{
+      const s=SVC[id]; if(!s||s.unit==='flat') return;
+      const entered=parseFloat(userQty[id]);
+      const expected=getExpectedQty(sc,id);
+      if(isNaN(entered)||entered<=0){
+        wrong.push({id, fb:`⚠ Keine Anzahl für „${s.name}" eingegeben – ohne Anzahl kann kein Preis berechnet werden.`});
+      } else if(expected>0 && Math.abs(entered-expected)/expected > 0.15){
+        wrong.push({id, fb:`⚠ Anzahl für „${s.name}": du hast ${entered} eingegeben, erwartet ca. ${expected}. Passt die Anzahl zur Kundensituation?`});
+      }
+    });
+  }
+
+  // Service feedback
+  items.filter(id=>id!=='nc').forEach(id=>{
+    const fb=ev.feedback[id]; if(!fb) return;
+    if(fb.startsWith('✓')) correct.push({id,fb});
+    else if(fb.startsWith('✗')||fb.startsWith('⚠')) wrong.push({id,fb});
+    else upsell.push({id,fb});
+  });
+
+  // Bundle vs Einzelservice price tips
+  const q=sc.quantities;
+  const hasMusB=sel['mus'],hasMupB=sel['mup'];
+  const hasEpU=sel['ep_u'],hasPmU=sel['pm_u'],hasMonU=sel['mon_u'];
+  if(!hasMusB&&!hasMupB&&hasEpU&&hasPmU&&hasMonU){
+    const qty=activeSg==='sg2'?(parseFloat(userQty['ep_u'])||q.user||0):(q.user||0);
+    const einzeln=(14.90+14.90+7.90)*qty, bundle=31.90*qty;
+    if(einzeln>bundle) upsell.push({id:'tip_u',fb:`ℹ Preistipp Benutzer: Du hast alle 3 User-Einzelservices gewählt (${fmtEur(einzeln)}/Monat). Managed User Standard enthält dieselben Services für ${fmtEur(bundle)}/Monat – ${fmtEur(einzeln-bundle)} günstiger.`});
+  }
+  const hasMssB=sel['mss'],hasMspB=sel['msp'];
+  const hasEpS=sel['ep_s'],hasPmS=sel['pm_s'],hasMonS=sel['mon_s'];
+  if(!hasMssB&&!hasMspB&&hasEpS&&hasPmS&&hasMonS){
+    const qty=activeSg==='sg2'?(parseFloat(userQty['ep_s'])||q.server||0):(q.server||0);
+    const einzeln=(19.90+19.90+19.90)*qty, bundle=49.90*qty;
+    if(einzeln>bundle) upsell.push({id:'tip_s',fb:`ℹ Preistipp Server: Du hast alle 3 Server-Einzelservices gewählt (${fmtEur(einzeln)}/Monat). Managed Server Standard enthält dieselben Services für ${fmtEur(bundle)}/Monat – ${fmtEur(einzeln-bundle)} günstiger.`});
+  }
+
+  // Missing checks
+  const hasUserCov = sel['mus']||sel['mup']||sel['ep_u']||sel['pm_u']||sel['mon_u'];
+  const hasServerCov = sel['mss']||sel['msp']||sel['ep_s']||sel['pm_s']||sel['mon_s'];
+  if(ev.user_min && !hasUserCov && (q.user||0)>0 && ev.missing_user) missing.push(ev.missing_user);
+  if(ev.server_min && !hasServerCov && (q.server||0)>0 && ev.missing_server) missing.push(ev.missing_server);
+  if(ev.security_min==='msecp'&&!sel['msecp']&&!sel['itsb']&&ev.missing_msecp) missing.push(ev.missing_msecp);
+  if(ev.security_min==='msecs'&&!sel['msecs']&&!sel['msecp']&&!sel['fw']&&!sel['m365b']&&!sel['adbase']&&ev.missing_msecs) missing.push(ev.missing_msecs);
+  ev.addons_required.forEach(aid=>{ if(!sel[aid]){ const k='missing_'+aid; if(ev[k]) missing.push(ev[k]); } });
+  if((q.mob_user||0)>0){
+    if(!['h1_mob','h2_mob','h3_mob','h4_mob'].some(k=>sel[k])&&ev.missing_hornet_mob) missing.push(ev.missing_hornet_mob);
+  }
+  ev.addons_recommended.forEach(aid=>{
+    if(!sel[aid]&&!items.includes(aid)){
+      const k='missing_'+aid; if(ev[k]) upsell.push({id:aid, fb:'ℹ '+SVC[aid].name+': '+ev[k]});
+    }
+  });
+
+  const target_min=ev.price_min+249, target_max=ev.price_max+249;
+  const inRange=monthly>=target_min&&monthly<=target_max;
+  let verdict,vColor;
+  if(monthly===0)          {verdict='Kein Angebot erstellt';               vColor='var(--red)';}
+  else if(!sel['nc'])      {verdict='Nösse Connect fehlt!';               vColor='var(--red)';}
+  else if(inRange)         {verdict='Im richtigen Bereich ✓';            vColor='var(--green)';}
+  else if(monthly<target_min){verdict='Zu niedrig – Positionen fehlen';  vColor='var(--gold)';}
+  else                     {verdict='Über Richtwert – Auswahl prüfen';   vColor='var(--gold)';}
+
+  return {correct,wrong,missing,upsell,monthly,initial,verdict,vColor,priceMin:target_min,priceMax:target_max};
+}
+
+function getExpectedQty(sc, id){
+  const s=SVC[id]; const q=sc.quantities;
+  if(!s) return 0;
+  if(s.unit==='user')     return q.user||0;
+  if(s.unit==='server')   return q.server||0;
+  if(s.unit==='device')   return q.device||0;
+  if(s.unit==='ap')       return q.ap||0;
+  if(s.unit==='mob_user') return q.mob_user||0;
+  return 0;
+}
+
+// ── Build price summary HTML ───────────────────────────────────────────────────
+function buildPriceSummary(sc){
+  const monthly=calcMonthly(sc,selections);
+  const initial=calcInitial(selections);
+  const hasAny=Object.values(selections).some(v=>v);
+  const ncWarn=hasAny&&!selections['nc']?`<div class="nc-warn-bar">⚠ Managed Nösse Connect noch nicht gewählt!</div>`:'';
+  return `${ncWarn}<div class="price-summary">
+    <div class="psrow"><div><div class="ps-lbl">Monatlich laufend</div><div class="ps-sub">netto / Monat</div></div><div class="ps-val">${fmtEur(monthly)}</div></div>
+    <div class="psrow total"><div><div class="ps-lbl">Einmalig Onboarding</div><div class="ps-sub">netto, einmalig</div></div><div class="ps-val init">${fmtEur(initial)}</div></div>
+  </div>`;
+}
+
+// ── Build option row HTML ─────────────────────────────────────────────────────
+function buildOptionRow(sc, id, extraCls){
+  const s=SVC[id]; if(!s) return '';
+  const isSel=!!selections[id];
+  const cls='option-row'+(isSel?' selected':'')+(submitted?' locked':'')+(extraCls?' '+extraCls:'');
+  const qty=activeSg==='sg2'&&isSel&&s.unit!=='flat';
+  let qtyHtml='';
+  if(qty){
+    const val=userQty[id]??'';
+    const expected=getExpectedQty(sc,id);
+    const num=parseFloat(val);
+    const linePrice=(!isNaN(num)&&num>0)?fmtEur(s.price*num)+' / Monat':'—';
+    const inputCls='qty-input'+(!isNaN(num)&&num>0?expected>0&&Math.abs(num-expected)/expected<=0.15?' valid':' warn':'');
+    qtyHtml=`<div class="qty-wrap">
+      <span class="qty-label">Anzahl ${UNIT_LABEL[s.unit]||''}:</span>
+      <input type="number" class="${inputCls}" min="0" step="1" value="${val}"
+        onclick="event.stopPropagation()"
+        oninput="event.stopPropagation();userQty['${id}']=this.value;setQty('${id}',this.value);this.className='qty-input'+(!isNaN(parseFloat(this.value))&&parseFloat(this.value)>0?''  +(${expected}>0&&Math.abs(parseFloat(this.value)-${expected})/${expected}<=0.15?' valid':' warn'):'');"
+      />
+      <span class="qty-calc pos">${linePrice}</span>
+    </div>`;
+  } else if(!qty&&isSel&&activeSg==='sg1'&&s.unit!=='flat'){
+    const expected=getExpectedQty(sc,id);
+    qtyHtml=`<div class="qty-wrap"><span class="qty-label">Anzahl aus Szenario:</span><span class="qty-calc pos">${expected} ${UNIT_LABEL[s.unit]||''} → ${fmtEur(s.price*expected)} / Monat</span></div>`;
+  }
+  return `<div class="${cls}" onclick="selectItem('${id}')">
+    <div class="opt-check"><div class="opt-check-inner"></div></div>
+    <div class="opt-info">
+      <div class="opt-name">${s.name}</div>
+      <div class="opt-sub">${s.sub}</div>
+      <div class="opt-price">${basePriceLabel(id)}</div>
+      ${qtyHtml}
+    </div>
+  </div>`;
+}
+
+// ── SCREEN 1: Zielgruppe ──────────────────────────────────────────────────────
+function renderTg(){
+  return `
+    <div class="sel-intro-title">Wähle deine Zielgruppe</div>
+    <p class="sel-intro-sub">Die Szenarien und typischen Lösungsansätze unterscheiden sich je nach Unternehmensgröße und IT-Reifegrad.</p>
+    <div class="card-grid-2">
+      <div class="sel-card tg1-card" onclick="pickTg('tg1')">
+        <div class="sel-card-num">Zielgruppe 1</div>
+        <div class="sel-card-name">Kleinere Unternehmen · 10–100 Mitarbeiter</div>
+        <div class="sel-card-desc">IT wird durch die Geschäftsführung verantwortet. Maximal eine Person operativ zuständig. Wenig strategischer Ansatz – IT soll einfach laufen.</div>
+        <div class="sel-card-tags"><span class="sel-tag">GF als Gesprächspartner</span><span class="sel-tag">Bundles häufig sinnvoll</span><span class="sel-tag">Preisorientiert</span></div>
+        <div class="sel-cta">7 Szenarien →</div>
+      </div>
+      <div class="sel-card tg2-card" onclick="pickTg('tg2')">
+        <div class="sel-card-num">Zielgruppe 2</div>
+        <div class="sel-card-name">Mittlere Unternehmen · 50–500 Mitarbeiter</div>
+        <div class="sel-card-desc">IT-Verantwortlicher mit kleinem Team. Denkt strategisch, kennt die Risiken. Entscheidungen auf Basis von Fachargumenten und Compliance-Anforderungen.</div>
+        <div class="sel-card-tags"><span class="sel-tag">IT-Leitung als Partner</span><span class="sel-tag">Einzelservices prüfen</span><span class="sel-tag">Compliance-bewusst</span></div>
+        <div class="sel-cta">7 Szenarien →</div>
+      </div>
+    </div>`;
+}
+
+// ── SCREEN 2: Schwierigkeitsgrad ──────────────────────────────────────────────
+function renderSg(){
+  const tgLabel=activeTg==='tg1'?'Zielgruppe 1 · 10–100 MA':'Zielgruppe 2 · 50–500 MA';
+  return `
+    <div class="back-bar">
+      <button class="btn-back" onclick="backToTg()">← Zielgruppe wechseln</button>
+      <span class="back-label">${tgLabel}</span>
+    </div>
+    <div class="sel-intro-title">Wähle den Schwierigkeitsgrad</div>
+    <p class="sel-intro-sub">In beiden Graden stehen alle Bundles und Einzelservices zur Auswahl. Der Unterschied liegt darin, ob du die Mengen selbst ermitteln musst.</p>
+    <div class="card-grid-2">
+      <div class="sel-card sg1-card" onclick="pickSg('sg1')">
+        <div class="sel-card-num">Schwierigkeitsgrad 1</div>
+        <div class="sel-card-name">Einstieg – Services auswählen</div>
+        <div class="sel-card-desc">Du wählst die passenden Services und Bundles aus. Die Mengen (Anzahl User, Server etc.) werden automatisch aus dem Szenario übernommen. Du siehst nach deiner Auswahl, welche Kosten sich ergeben.</div>
+        <div class="sel-card-tags"><span class="sel-tag">Fokus: Inhaltliche Auswahl</span><span class="sel-tag">Mengen automatisch</span><span class="sel-tag">Für Einsteiger</span></div>
+        <div class="sel-cta">Jetzt starten →</div>
+      </div>
+      <div class="sel-card sg2-card" onclick="pickSg('sg2')">
+        <div class="sel-card-num">Schwierigkeitsgrad 2</div>
+        <div class="sel-card-name">Fortgeschritten – Mengen selbst ermitteln</div>
+        <div class="sel-card-desc">Du wählst Services und Bundles aus und gibst außerdem selbst die benötigte Anzahl je Service ein. Die Anzahl muss zur Kundensituation passen. Der Preis wird auf Basis deiner Eingaben berechnet.</div>
+        <div class="sel-card-tags"><span class="sel-tag">Fokus: Inhalt + Kalkulation</span><span class="sel-tag">Mengen selbst eingeben</span><span class="sel-tag">Für Fortgeschrittene</span></div>
+        <div class="sel-cta">Jetzt starten →</div>
+      </div>
+    </div>`;
+}
+
+// ── SCREEN 3: Fall-Auswahl ────────────────────────────────────────────────────
+function renderPick(){
+  const tgSc=SC.filter(s=>s.tg===activeTg);
+  const tgLabel=activeTg==='tg1'?'Zielgruppe 1':'Zielgruppe 2';
+  const sgLabel=activeSg==='sg1'?'Schwierigkeitsgrad 1':'Schwierigkeitsgrad 2';
+  let cards='';
+  tgSc.forEach((sc,i)=>{
+    const gi=SC.indexOf(sc);
+    cards+=`<div class="pick-card" style="--accent:${sc.color}" onclick="pickScenario(${gi})">
+      <div class="pick-num">Fall ${i+1}</div>
+      <div class="pick-name">${sc.name}</div>
+      <div class="pick-industry">${sc.industry}</div>
+      <div class="pick-facts">${sc.facts.slice(0,3).map(f=>`<span class="pick-fact">${f.icon} ${f.label}</span>`).join('')}</div>
+      ${sc.solution_hint?`<div class="pick-hint">${sc.solution_hint}</div>`:''}
+      <div class="pick-cta">Fall öffnen →</div>
+    </div>`;
+  });
+  return `
+    <div class="back-bar">
+      <button class="btn-back" onclick="backToSg()">← Schwierigkeitsgrad wechseln</button>
+      <span class="back-label">${tgLabel} · ${sgLabel}</span>
+    </div>
+    <div class="sel-intro-title" style="margin-bottom:4px">Wähle einen Kundenfall</div>
+    <p class="sel-intro-sub" style="margin-bottom:16px">Details und Gesprächsaussagen werden erst nach deiner Auswahl sichtbar.</p>
+    <div class="pick-grid">${cards}</div>`;
+}
+
+// ── SCREEN 4: Quiz ────────────────────────────────────────────────────────────
+function renderQuiz(){
+  const sc=SC[currentSc];
+  const tgSc=SC.filter(s=>s.tg===activeTg);
+  const li=tgSc.indexOf(sc);
+  const nextGi=SC.indexOf(tgSc[(li+1)%tgSc.length]);
+  const tgLabel=activeTg==='tg1'?'ZG 1':'ZG 2';
+  const sgLabel=activeSg==='sg1'?'SG 1':'SG 2';
+  const gpLabel=activeTg==='tg1'?'Geschäftsführer':'IT-Leiter';
+
+  // Customer card
+  const factsHtml=sc.facts.map(f=>`<div class="fact-item"><span>${f.icon}</span>${f.label}</div>`).join('');
+  const stmtsHtml=sc.statements.map(s=>`<div class="stmt">${s}</div>`).join('');
+  const customerHtml=`<div class="customer-card">
+    <div class="customer-header">
+      <div class="customer-industry">${sc.industry}</div>
+      <div class="customer-name">${sc.name}</div>
+      <div><span class="sg-pill ${activeSg}-pill">${activeSg==='sg1'?'Schwierigkeitsgrad 1 – Mengen automatisch':'Schwierigkeitsgrad 2 – Mengen selbst eingeben'}</span></div>
+    </div>
+    <div class="facts-grid">${factsHtml}</div>
+    <div class="statements-box">
+      <div class="stmts-label">Der ${gpLabel} sagt:</div>
+      ${stmtsHtml}
+    </div>
+  </div>`;
+
+  // NC block
+  const ncSel=!!selections['nc'];
+  const ncCls='option-row nc-row'+(ncSel?' selected':'')+(submitted?' locked':'');
+  const ncHtml=`<div class="nc-block">
+    <div class="nc-block-lbl">⚡ Zwingend erforderlich – Voraussetzung für alle Services</div>
+    <div class="${ncCls}" onclick="selectItem('nc')">
+      <div class="opt-check"><div class="opt-check-inner"></div></div>
+      <div class="opt-info">
+        <div class="opt-name">Managed Nösse Connect</div>
+        <div class="opt-sub">Serviceplattform-Anbindung · SLA · Serviceportal · Fernwartungszugang · Mo–Fr 08–18 Uhr</div>
+        <div class="opt-price">249,00 € / Monat &nbsp;+&nbsp; 1.200,00 € einmalig (Onboarding)</div>
+      </div>
+    </div>
+    ${!ncSel&&!submitted?'<div class="nc-hint">Managed Nösse Connect muss immer als erstes gebucht werden – ohne diesen Service können keine weiteren Services gebucht werden.</div>':''}
+  </div>`;
+
+  // Service groups
+  const groups=[
+    {sep:'Benutzer-Absicherung',sub:'Bundle oder Einzelservices – beide gleichzeitig wählbar zum Vergleich'},
+    {key:'user',    lbl:'Bundle – Benutzer',                              ids:['mus','mup']},
+    {key:'einz_u',  lbl:'Einzelservices – Benutzer',                     ids:['ep_u','pm_u','mon_u']},
+    {sep:'Server-Absicherung',sub:'Bundle oder Einzelservices – beide gleichzeitig wählbar zum Vergleich'},
+    {key:'server',  lbl:'Bundle – Server',                                ids:['mss','msp']},
+    {key:'einz_s',  lbl:'Einzelservices – Server',                       ids:['ep_s','pm_s','mon_s','bak_s']},
+    {sep:'Sicherheits-Absicherung',sub:'Bundle oder Einzelservices – beide gleichzeitig wählbar zum Vergleich'},
+    {key:'security',lbl:'Bundle – Security',                              ids:['msecs','msecp']},
+    {key:'einz_sec',lbl:'Einzelservices – Security',                     ids:['fw','m365b','adbase','itsb','svm','svm_c','svm_s']},
+    {sep:'Add-on Services',sub:'Mehrfachauswahl möglich'},
+    {key:'addon',   lbl:'Add-on Services',                               ids:['mdru','mdrs','sat','mdm','wifi']},
+  ];
+  const hornetMob={key:'hm',lbl:'Hornetsecurity – Mobilnutzer ohne User-Bundle',ids:['h2_mob','h3_mob']};
+  const hornetUp= {key:'hu',lbl:'Hornet Upgrade Plan 3→4 – Aufpreis auf MUP',    ids:['h4_up']};
+
+  let groupsHtml='';
+  groups.forEach(g=>{
+    if(g.sep){
+      groupsHtml+=`<div class="group-sep">${g.sep}<span class="group-sub">${g.sub}</span></div>`;
+      return;
+    }
+    const avail=g.ids.filter(id=>sc.available.includes(id));
+    if(!avail.length) return;
+    const rows=avail.map(id=>buildOptionRow(sc,id,'')).join('');
+    groupsHtml+=`<div class="group-blk"><div class="group-lbl">${g.lbl}</div>${rows}</div>`;
+  });
+  [hornetMob,hornetUp].forEach(g=>{
+    const avail=g.ids.filter(id=>sc.available.includes(id));
+    if(!avail.length) return;
+    const rows=avail.map(id=>buildOptionRow(sc,id,'')).join('');
+    groupsHtml+=`<div class="group-blk hornet-blk"><div class="group-lbl hornet-lbl">${g.lbl}</div>${rows}</div>`;
+  });
+
+  const hasAny=Object.values(selections).some(v=>v);
+
+  const selectorHtml=`<div class="selector-card">
+    <div class="sel-title">Dein Angebot für ${sc.name}</div>
+    ${ncHtml}
+    ${groupsHtml}
+    <div id="price-summary-area">${buildPriceSummary(sc)}</div>
+    <button class="btn-submit" onclick="doSubmit()" ${submitted||!hasAny?'disabled':''}>
+      ${submitted?'Angebot ausgewertet ✓':'Angebot abgeben &amp; auswerten →'}
+    </button>
+  </div>`;
+
+  // Feedback
+  let feedbackHtml='';
+  if(submitted){
+    const fb=buildFeedback(sc,selections);
+    const cRows=fb.correct.map(x=>`<div class="fbi fbi-g">${x.fb}</div>`).join('');
+    const wRows=fb.wrong.map(x=>`<div class="fbi fbi-r">${x.fb}</div>`).join('');
+    const mRows=fb.missing.map(x=>`<div class="fbi fbi-r">${x}</div>`).join('');
+    const uRows=fb.upsell.map(x=>`<div class="fbi fbi-b">${x.fb}</div>`).join('');
+    feedbackHtml=`<div class="feedback-wrap" id="feedback">
+      <div class="fb-header">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:3px;">Auswertung · ${sc.name}</div>
+        <div class="fb-price-row">
+          <div class="fb-price-box"><div class="fb-price-lbl">Dein Angebot · monatlich</div><div class="fb-price-val" style="color:${fb.vColor}">${fmtEur(fb.monthly)}</div><div class="fb-price-sub" style="color:${fb.vColor}">${fb.verdict}</div></div>
+          <div class="fb-price-box"><div class="fb-price-lbl">Dein Angebot · einmalig</div><div class="fb-price-val" style="color:var(--gold)">${fmtEur(fb.initial)}</div><div class="fb-price-sub">Onboarding Connect</div></div>
+          <div class="fb-price-box"><div class="fb-price-lbl">Richtwert monatlich</div><div class="fb-price-val" style="color:var(--text2);font-size:15px">${fmtEur(fb.priceMin)}<br>bis ${fmtEur(fb.priceMax)}</div><div class="fb-price-sub">inkl. Connect 249 €</div></div>
+        </div>
+      </div>
+      ${cRows?`<div class="fb-sec fbs-g"><div class="fb-sec-title">✓ Richtig (${fb.correct.length})</div>${cRows}</div>`:''}
+      ${(wRows||mRows)?`<div class="fb-sec fbs-r"><div class="fb-sec-title">✗ Falsch / Fehlend (${fb.wrong.length+fb.missing.length})</div>${wRows}${mRows}</div>`:''}
+      ${uRows?`<div class="fb-sec fbs-b"><div class="fb-sec-title">ℹ Upsell-Chancen, Empfehlungen &amp; Preistipps</div>${uRows}</div>`:''}
+      <div class="fb-nav">
+        <button class="btn-next" onclick="backToPick()">← Fallauswahl</button>
+        <button class="btn-next" onclick="pickScenario(${nextGi})">Nächster Fall → ${SC[nextGi].name}</button>
+      </div>
+    </div>`;
+  }
+
+  return `
+    <div class="back-bar">
+      <button class="btn-back" onclick="backToPick()">← Zurück zur Fallauswahl</button>
+      <span class="back-label">Fall ${li+1}/7 · ${tgLabel} · ${sgLabel}</span>
+    </div>
+    <div class="grid2">${customerHtml}${selectorHtml}</div>
+    ${feedbackHtml}`;
+}
+
+// ── Main render ───────────────────────────────────────────────────────────────
+function render(){
+  const app=document.getElementById('app');
+  if(phase==='tg')        app.innerHTML=renderTg();
+  else if(phase==='sg')   app.innerHTML=renderSg();
+  else if(phase==='pick') app.innerHTML=renderPick();
+  else                    app.innerHTML=renderQuiz();
+}
+
+render();
+</script>
+</body>
+</html>
